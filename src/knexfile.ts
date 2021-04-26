@@ -1,6 +1,6 @@
 "use strict";
 
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 module.exports = {
@@ -8,8 +8,8 @@ module.exports = {
     client: "postgresql",
     connection: process.env.DATABASE_URL,
     migrations: {
-      tableName: 'knex_migrations',
-      directory: `${ __dirname }/db/migrations`
+      tableName: "knex_migrations",
+      directory: `${ __dirname }/../db/migrations`
     }
   },
 
