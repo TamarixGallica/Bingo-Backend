@@ -6,6 +6,9 @@ import path from "path";
 // Controllers (route handlers)
 import * as dummyController from "./controllers/dummy";
 
+// Routes
+import cardRouter from "./routes/card";
+
 // Create Express server
 const app = express();
 
@@ -23,6 +26,8 @@ app.use(
 /**
  * API examples routes.
  */
-app.get("/api", dummyController.dummyApi);
+app.get("/dummyapi", dummyController.dummyApi);
+app.get("/api/card", cardRouter.getCards);
+app.get("/api/card/:id", cardRouter.getCardById);
 
 export default app;

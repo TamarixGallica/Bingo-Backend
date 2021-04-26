@@ -50,3 +50,7 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
 - Theme
   - Property: Id
   - Property: Name
+
+# Configuration
+
+Set environment variable DATABASE_URL to specify the connection string for database. Only PostgreSQL is supported at this time. Using .env file is supported. Example value: `postgres://username:password@localhost:5432/bingo`
