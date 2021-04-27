@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
         table.bigIncrements();
         table.string("text").notNullable();
         table.timestamps(true, true);
-    })
+    });
 }
 
 
