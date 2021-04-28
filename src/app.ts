@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import path from "path";
 
 // Route handlers
-import cardRouter from "./routes/card";
+import squareRouter from "./routes/square";
 
 // Create Express server
 const app = express();
@@ -21,7 +21,7 @@ app.use(
 );
 
 // Routes
-app.get("/api/card", cardRouter.getCards);
-app.get("/api/card/:id", cardRouter.getCardById);
+app.get("/api/square", squareRouter.getSquares);
+app.get("/api/square/:id", squareRouter.getSquareById);
 
 export default app;

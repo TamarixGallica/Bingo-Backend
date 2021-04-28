@@ -1,8 +1,8 @@
 import { Knex } from "knex";
 import dotenv from "dotenv";
-import { Card } from "../../src/models";
+import { Square } from "../../src/models";
 
-export const cardEntries: Card[] = [
+export const squareEntries: Square[] = [
     { id: 1, text: "The first one" },
     { id: 2, text: "The improved edition" },
     { id: 3, text: "About to lose count" },
@@ -13,8 +13,8 @@ export async function seed(knex: Knex): Promise<void> {
     dotenv.config();
 
     // Deletes ALL existing entries
-    await knex("cards").del();
+    await knex("squares").del();
 
     // Inserts seed entries
-    await knex("cards").insert(cardEntries);
+    await knex("squares").insert(squareEntries);
 }

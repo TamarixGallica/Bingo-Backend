@@ -1,3 +1,3 @@
 "use strict";
 
-export * from "./card";
+export * from "./square";

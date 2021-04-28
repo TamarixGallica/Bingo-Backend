@@ -17,7 +17,7 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
 - [ ] API should expose an endpoint for reading, creating, updating and deleting 
   - [ ] Bingo squares
     - [ ] Read
-      - [ ] By identifier
+      - [X] By identifier
       - [ ] By search string
     - [ ] Create
     - [ ] Update
@@ -43,7 +43,7 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
 
 # Entities
 
-- Card
+- Square
   - Property: Id
   - Property: Text
   - Links to 0..* Themes
