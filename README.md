@@ -24,7 +24,7 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
     - [ ] Delete
   - [ ] Themes
     - [ ] Read
-      - [ ] By identifier
+      - [X] By identifier
       - [ ] By search string
     - [ ] Create
     - [ ] Update
