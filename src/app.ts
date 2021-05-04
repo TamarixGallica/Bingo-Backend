@@ -1,11 +1,15 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import compression from "compression";  // compresses requests
 import bodyParser from "body-parser";
 import path from "path";
+import { validate, ValidationError, Joi, schema } from "express-validation";
 
 // Route handlers
 import squareRouter from "./routes/square";
 import themeRouter from "./routes/theme";
+
+// Request validators
+import { squareIdValidator, themeIdValidator } from "./validators";
 
 // Create Express server
 const app = express();
@@ -23,8 +27,17 @@ app.use(
 
 // Routes
 app.get("/api/square", squareRouter.getSquares);
-app.get("/api/square/:id", squareRouter.getSquareById);
+app.get("/api/square/:id", validate(squareIdValidator), squareRouter.getSquareById);
 app.get("/api/theme", themeRouter.getThemes);
-app.get("/api/theme/:id", themeRouter.getThemeById);
+app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+    if (err instanceof ValidationError) {
+      return res.status(err.statusCode).json(err);
+    }
+  
+    return res.status(500).json(err);
+  });
 
 export default app;

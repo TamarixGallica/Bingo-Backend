@@ -75,6 +75,11 @@ describe("GET /api/theme", () => {
             expect(response.status).toEqual(400);
         });
 
+        it("should return 400 Bad Request when negative number is used as id", async () => {
+            const response = await request(app).get(`${themeApi}/-9`);
+            expect(response.status).toEqual(400);
+        });
+
         it("should return 404 Not Found for theme not in database", async () => {
             const id = Math.max(...themeEntries.map(x => x.id)) + 1;
             const response = await request(app).get(`${themeApi}/${id}`);

@@ -11,11 +11,6 @@ export const getThemes = async (req: Request, res: Response): Promise<void> => {
 export const getThemeById = async (req: Request, res: Response): Promise<void> => {
     const id = parseInt(req.params.id, 10);
 
-    if (Number.isNaN(id))
-    {
-        return res.status(400).end();
-    }
-
     const theme = await themeService.getThemeById(id);
 
     if (theme)

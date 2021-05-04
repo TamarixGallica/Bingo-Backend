@@ -81,6 +81,11 @@ describe("GET /api/square", () => {
             expect(response.status).toEqual(400);
         });
 
+        it("should return 400 Bad Request when negative number is used as id", async () => {
+            const response = await request(app).get(`${cardApi}/-4`);
+            expect(response.status).toEqual(400);
+        });
+
         it("should return 404 Not Found for square not in database", async () => {
             const id = Math.max(...squareEntries.map(x => x.id)) + 1;
             const response = await request(app).get(`${cardApi}/${id}`);
