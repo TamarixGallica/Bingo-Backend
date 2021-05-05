@@ -5,8 +5,8 @@ import path from "path";
 import { validate, ValidationError, Joi, schema } from "express-validation";
 
 // Route handlers
-import squareRouter from "./routes/square";
-import themeRouter from "./routes/theme";
+import squareRouter from "./routes/squareRouter";
+import themeRouter from "./routes/themeRouter";
 
 // Request validators
 import { squareIdValidator, squareQueryValidator, themeIdValidator } from "./validators";

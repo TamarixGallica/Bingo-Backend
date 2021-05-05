@@ -1,7 +1,7 @@
 "use strict";
 
 import { Theme } from "../models";
-import knex from "./knex";
+import knex from "./knexService";
 
 const tableName = "themes";
 const returnedProps = ["id", "name"];

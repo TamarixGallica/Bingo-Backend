@@ -1,4 +1,4 @@
 "use strict";
 
-export * from "./square";
-export * from "./theme";
+export * from "./squareModel";
+export * from "./themeModel";

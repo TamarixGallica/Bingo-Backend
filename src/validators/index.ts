@@ -1,2 +1,2 @@
-export * from "./square";
-export * from "./theme";
+export * from "./squareValidator";
+export * from "./themeValidator";

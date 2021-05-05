@@ -1,7 +1,7 @@
 "use strict";
 
 import { Square } from "../models";
-import knex from "./knex";
+import knex from "./knexService";
 
 export interface SquareQueryParams {
     text?: string;

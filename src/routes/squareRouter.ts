@@ -1,7 +1,7 @@
 "use strict";
 
 import { Request, Response } from "express";
-import squareService, { SquareQueryParams } from "../services/square";
+import squareService, { SquareQueryParams } from "../services/squareService";
 
 export const getSquares = async (req: Request, res: Response): Promise<void> => {
     const queryParams: SquareQueryParams = {

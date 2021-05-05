@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../src/app";
-import knex from "../src/services/knex";
+import knex from "../src/services/knexService";
 import { Square } from "../src/models";
 import { squareEntries } from "../db/seeds/001_squares";
 
