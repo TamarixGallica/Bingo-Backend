@@ -3,11 +3,21 @@
 import { Square } from "../models";
 import knex from "./knex";
 
+export interface SquareQueryParams {
+    text?: string;
+}
+
 const tableName = "squares";
 const returnedProps = ["id", "text"];
 
-export const getSquares = async (): Promise<Square[]> => {
-    const squares = await knex.select(returnedProps).from<Square>(tableName);
+export const getSquares = async (queryParams: SquareQueryParams): Promise<Square[]> => {
+    const query = knex.select(returnedProps).from<Square>(tableName);
+
+    if (queryParams.text) {
+        query.where("text", "ilike", `%${queryParams.text}%`);
+    }
+
+    const squares = await query;
     return squares;
 };
 

@@ -9,7 +9,7 @@ import squareRouter from "./routes/square";
 import themeRouter from "./routes/theme";
 
 // Request validators
-import { squareIdValidator, themeIdValidator } from "./validators";
+import { squareIdValidator, squareQueryValidator, themeIdValidator } from "./validators";
 
 // Create Express server
 const app = express();
@@ -26,7 +26,7 @@ app.use(
 );
 
 // Routes
-app.get("/api/square", squareRouter.getSquares);
+app.get("/api/square", validate(squareQueryValidator), squareRouter.getSquares);
 app.get("/api/square/:id", validate(squareIdValidator), squareRouter.getSquareById);
 app.get("/api/theme", themeRouter.getThemes);
 app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);
