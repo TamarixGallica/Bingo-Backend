@@ -1,10 +1,13 @@
 "use strict";
 
 import { Request, Response } from "express";
-import themeService from "../services/themeService";
+import themeService, { ThemeQueryParams } from "../services/themeService";
 
 export const getThemes = async (req: Request, res: Response): Promise<void> => {
-    const themes = await themeService.getThemes();
+    const queryParams: ThemeQueryParams = {
+        name: req.query.name as string
+    };
+    const themes = await themeService.getThemes(queryParams);
     res.json(themes);
 };
 

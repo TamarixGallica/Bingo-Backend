@@ -3,11 +3,21 @@
 import { Theme } from "../models";
 import knex from "./knexService";
 
+export interface ThemeQueryParams {
+    name?: string;
+}
+
 const tableName = "themes";
 const returnedProps = ["id", "name"];
 
-export const getThemes = async (): Promise<Theme[]> => {
-    const themes = await knex.select(returnedProps).from<Theme>(tableName);
+export const getThemes = async (queryParams: ThemeQueryParams): Promise<Theme[]> => {
+    const query = knex.select(returnedProps).from<Theme>(tableName);
+
+    if (queryParams.name) {
+        query.where("name", "ilike", `%${queryParams.name}%`);
+    }
+
+    const themes = await query;
     return themes;
 };
 

@@ -34,7 +34,7 @@ describe("GET /api/theme", () => {
             expect(Array.isArray(response.body)).toEqual(true);
         });
 
-        it("should return all squares with correct data", async () => {
+        it("should return all themes with correct data", async () => {
             const response = await request(app).get(themeApi);
             const returnedThemes: Theme[] = response.body;
             expect(returnedThemes.length).toEqual(themeEntries.length);
@@ -45,6 +45,50 @@ describe("GET /api/theme", () => {
                 expect(returnedTheme.id).toEqual(theme.id.toString());
                 expect(returnedTheme.name).toEqual(theme.name);
             }
+        });
+    });
+
+    describe("filter based on text", () => {
+
+        it("should allow only a string as a name filter", async () => {
+            const response1 = await request(app).get(themeApi).query({ name: ["foo", "bar"]});
+            expect(response1.status).toEqual(400);
+
+            const response2 = await request(app).get(`${themeApi}?name=foo&text=bar`);
+            expect(response2.status).toEqual(400);
+
+            const response3 = await request(app).get(themeApi).query({ name: { foo: "foo", bar: "bar"}});
+            expect(response3.status).toEqual(400);
+
+            const response4 = await request(app).get(`${themeApi}?name=`);
+            expect(response4.status).toEqual(400);
+
+            const response5 = await request(app).get(themeApi).query({ name: "foo"});
+            expect(response5.status).toEqual(200);
+        });
+
+        it("should return specific theme with full text", async () => {
+            const response = await request(app).get(themeApi).query({name: themeEntries[0].name});
+            const returnedThemes: Theme[] = response.body;
+            expect(response.status).toEqual(200);
+            expect(returnedThemes.length).toEqual(1);
+        });
+
+        it("should return expected number of results with a single word", async () => {
+            const response = await request(app).get(themeApi).query({name: "the"});
+            const returnedThemes: Theme[] = response.body;
+            expect(response.status).toEqual(200);
+            expect(returnedThemes.length).toEqual(1);
+
+            const response2 = await request(app).get(themeApi).query({name: "contains"});
+            const returnedThemes2: Theme[] = response2.body;
+            expect(response2.status).toEqual(200);
+            expect(returnedThemes2.length).toEqual(1);
+
+            const response3 = await request(app).get(themeApi).query({name: "m"});
+            const returnedThemes3: Theme[] = response3.body;
+            expect(response3.status).toEqual(200);
+            expect(returnedThemes3.length).toEqual(2);
         });
     });
 
@@ -62,7 +106,7 @@ describe("GET /api/theme", () => {
             expect(response.type).toEqual("application/json");
         });
 
-        it("should return square with correct data", async () => {
+        it("should return theme with correct data", async () => {
             const theme = themeEntries[0];
             const response = await request(app).get(`${themeApi}/${theme.id}`);
             const receivedTheme: Theme = response.body;

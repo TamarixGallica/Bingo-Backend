@@ -16,16 +16,16 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
   - The order of squares should be randomized
 - [ ] API should expose an endpoint for reading, creating, updating and deleting 
   - [ ] Bingo squares
-    - [ ] Read
+    - [X] Read
       - [X] By identifier
       - [X] By search string
     - [ ] Create
     - [ ] Update
     - [ ] Delete
   - [ ] Themes
-    - [ ] Read
+    - [X] Read
       - [X] By identifier
-      - [ ] By search string
+      - [X] By search string
     - [ ] Create
     - [ ] Update
     - [ ] Delete
