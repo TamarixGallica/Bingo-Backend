@@ -2,7 +2,7 @@ import request from "supertest";
 import app from "../src/app";
 import knex from "../src/services/knexService";
 import { Square } from "../src/models";
-import { squareEntries } from "../db/seeds/001_squares";
+import { squareEntries } from "../db/seeds/001_squares_and_themes";
 
 const cardApi = "/api/square";
 
@@ -44,6 +44,13 @@ describe("GET /api/square", () => {
                 expect(returnedSquare).not.toBeNull();
                 expect(returnedSquare.id).toEqual(square.id.toString());
                 expect(returnedSquare.text).toEqual(square.text);
+                expect(Array.isArray(returnedSquare.themes)).toEqual(true);
+                expect(returnedSquare.themes.length).toEqual(square.themes.length);
+                square.themes.forEach((theme) => {
+                    const returnedTheme = returnedSquare.themes.find((t) => t.id == theme.id);
+                    expect(returnedTheme.id).toEqual(theme.id.toString());
+                    expect(returnedTheme.name).toEqual(theme.name);
+                });
             }
         });    
     });
@@ -118,7 +125,14 @@ describe("GET /api/square", () => {
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(square.id.toString());
             expect(receivedSquare.text).toEqual(square.text);
-        });
+            expect(Array.isArray(receivedSquare.themes)).toEqual(true);
+            expect(receivedSquare.themes.length).toEqual(square.themes.length);
+            square.themes.forEach((theme) => {
+                const returnedTheme = receivedSquare.themes.find((t) => t.id == theme.id);
+                expect(returnedTheme.id).toEqual(theme.id.toString());
+                expect(returnedTheme.name).toEqual(theme.name);
+            });
+    });
 
         it("should return 400 Bad Request when non-number is used as id", async () => {
             const response = await request(app).get(`${cardApi}/abc`);
