@@ -42,7 +42,7 @@ describe("GET /api/theme", () => {
             {
                 const returnedTheme = returnedThemes.find(x => x.id == theme.id);
                 expect(returnedTheme).not.toBeNull();
-                expect(returnedTheme.id).toEqual(theme.id.toString());
+                expect(returnedTheme.id).toEqual(theme.id);
                 expect(returnedTheme.name).toEqual(theme.name);
             }
         });
@@ -110,7 +110,7 @@ describe("GET /api/theme", () => {
             const theme = themeEntries[0];
             const response = await request(app).get(`${themeApi}/${theme.id}`);
             const receivedTheme: Theme = response.body;
-            expect(receivedTheme.id).toEqual(theme.id.toString());
+            expect(receivedTheme.id).toEqual(theme.id);
             expect(receivedTheme.name).toEqual(theme.name);
         });
 

@@ -42,13 +42,13 @@ describe("GET /api/square", () => {
             {
                 const returnedSquare = returnedSquares.find(x => x.id == square.id);
                 expect(returnedSquare).not.toBeNull();
-                expect(returnedSquare.id).toEqual(square.id.toString());
+                expect(returnedSquare.id).toEqual(square.id);
                 expect(returnedSquare.text).toEqual(square.text);
                 expect(Array.isArray(returnedSquare.themes)).toEqual(true);
                 expect(returnedSquare.themes.length).toEqual(square.themes.length);
                 square.themes.forEach((theme) => {
                     const returnedTheme = returnedSquare.themes.find((t) => t.id == theme.id);
-                    expect(returnedTheme.id).toEqual(theme.id.toString());
+                    expect(returnedTheme.id).toEqual(theme.id);
                     expect(returnedTheme.name).toEqual(theme.name);
                 });
             }
@@ -123,13 +123,13 @@ describe("GET /api/square", () => {
             const square = squareEntries[0];
             const response = await request(app).get(`${cardApi}/${square.id}`);
             const receivedSquare: Square = response.body;
-            expect(receivedSquare.id).toEqual(square.id.toString());
+            expect(receivedSquare.id).toEqual(square.id);
             expect(receivedSquare.text).toEqual(square.text);
             expect(Array.isArray(receivedSquare.themes)).toEqual(true);
             expect(receivedSquare.themes.length).toEqual(square.themes.length);
             square.themes.forEach((theme) => {
                 const returnedTheme = receivedSquare.themes.find((t) => t.id == theme.id);
-                expect(returnedTheme.id).toEqual(theme.id.toString());
+                expect(returnedTheme.id).toEqual(theme.id);
                 expect(returnedTheme.name).toEqual(theme.name);
             });
     });

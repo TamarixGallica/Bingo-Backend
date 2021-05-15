@@ -2,15 +2,15 @@ import { Knex } from "knex";
 
 
 export async function up(knex: Knex): Promise<void> {
-    return knex.schema.createTable("cards", (table) => {
-        table.bigIncrements();
-        table.string("text").notNullable();
+    return knex.schema.createTable("themes", (table) => {
+        table.increments();
+        table.string("name").notNullable();
         table.timestamps(true, true);
     });
 }
 
 
 export async function down(knex: Knex): Promise<void> {
-    return knex.schema.dropTable("cards");
+    return knex.schema.dropTable("themes");
 }
 

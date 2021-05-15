@@ -9,7 +9,7 @@ export interface SquareQueryParams {
 }
 
 interface SquareRow extends Square {
-    theme_id?: string;
+    theme_id?: number;
 }
 
 const squareTableName = "squares";
@@ -66,7 +66,7 @@ const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> 
 
         if (theme_id)
         {
-            const theme = themes.find((theme) => theme.id.toString() === theme_id);
+            const theme = themes.find((theme) => theme.id === theme_id);
             square.themes.push(theme);
         }
     });
