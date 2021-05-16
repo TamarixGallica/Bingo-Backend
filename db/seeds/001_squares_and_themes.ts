@@ -42,4 +42,9 @@ export async function seed(knex: Knex): Promise<void> {
     });
 
     await knex(squaresThemesTable).insert(squaresThemesLinksToAdd);
+
+    // Update auto increment counters manually because ids were specified on insert
+    await knex.raw("select setval('squares_id_seq', max(id)) from squares");
+    await knex.raw("select setval('themes_id_seq', max(id)) from themes");
+    await knex.raw("select setval('squares_themes_id_seq', max(id)) from squares_themes");
 }

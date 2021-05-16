@@ -2,7 +2,7 @@
 
 import { Request, Response } from "express";
 import themeService from "../services/themeService";
-import squareService, { SquareQueryParams, UpdateSquare } from "../services/squareService";
+import squareService, { AddSquare, SquareQueryParams, UpdateSquare } from "../services/squareService";
 
 export const getSquares = async (req: Request, res: Response): Promise<void> => {
     const queryParams: SquareQueryParams = {
@@ -10,6 +10,25 @@ export const getSquares = async (req: Request, res: Response): Promise<void> => 
     };
     const squares = await squareService.getSquares(queryParams);
     res.json(squares);
+};
+
+export const addSquare = async (req: Request, res: Response): Promise<void> => {
+    const squareToAdd: AddSquare = req.body;
+
+    if (squareToAdd.themeId?.length > 0)
+    {
+        const themes = await themeService.getThemesById(squareToAdd.themeId);
+        if (squareToAdd.themeId?.length > themes.length)
+        {
+            return res.status(400).end();
+        }
+    }
+
+    const id = await squareService.addSquare(squareToAdd);
+
+    const square = await squareService.getSquareById(id);
+
+    return res.json(square).end();
 };
 
 export const updateSquare = async (req: Request, res: Response): Promise<void> => {
@@ -54,4 +73,4 @@ export const getSquareById = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-export default { getSquares, getSquareById, updateSquare };
+export default { getSquares, getSquareById, updateSquare, addSquare };

@@ -21,6 +21,8 @@ const getExistingThemeIds = () => themeEntries.map(x => x.id);
 
 const getNonExistingThemeId = () => Math.max(...themeEntries.map(x => x.id)) + 1;
 
+const getTooLongText = () => "".padEnd(1024, "1234567890");
+
 describe("GET /api/square", () => {
 
     describe("retrieve all squares", () => {
@@ -158,6 +160,90 @@ describe("GET /api/square", () => {
     });
 });
 
+describe("POST /api/square", () => {
+
+    describe("validate requests", () => {
+
+        it("should return 400 Bad Request when using an empty body", async () => {
+            const response = await request(app).post(squareApi).send();
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when supplying id and text", async () => {
+            const response = await request(app).post(squareApi).send({ id: 1, text: "foo" });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when text is longer than allowed", async () => {
+            const text = getTooLongText();
+            const response = await request(app).post(squareApi).send({ text });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when text and non-existing theme id are supplied", async () => {
+            const themeId = getNonExistingThemeId();
+            const response = await request(app).post(squareApi).send({ text: "foo", themeId: [themeId] });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 200 when text is supplied", async () => {
+            const response = await request(app).post(squareApi).send({ text: "foo" });
+            expect(response.status).toEqual(200);
+        });
+
+        it("should return 200 when text and existing theme ids are supplied", async () => {
+            const themeIds = getExistingThemeIds();
+            const response = await request(app).post(squareApi).send({ text: "foo", themeId: themeIds });
+            expect(response.status).toEqual(200);
+        });
+    });
+
+    describe("add a square", () => {
+
+        it("should add a square without theme id array", async () => {
+            const text = "foobar";
+            const response = await request(app).post(squareApi).send({ text });
+            expect(response.status).toEqual(200);
+            const receivedSquare: Square = response.body;
+            expect(Number.isInteger(receivedSquare.id)).toEqual(true);
+            expect(receivedSquare.text).toEqual(text);
+            expect(receivedSquare.themes.length).toEqual(0);
+        });
+
+        it("should add a square with empty theme id array", async () => {
+            const text = "tinstafl";
+            const response = await request(app).post(squareApi).send({ text, themeId: [] });
+            expect(response.status).toEqual(200);
+            const receivedSquare: Square = response.body;
+            expect(Number.isInteger(receivedSquare.id)).toEqual(true);
+            expect(receivedSquare.text).toEqual(text);
+            expect(receivedSquare.themes.length).toEqual(0);
+        });
+
+        it("should add a square with a single theme id", async () => {
+            const text = "tinstafl";
+            const themeIds = getExistingThemeIds().slice(-1, 1);
+            const response = await request(app).post(squareApi).send({ text, themeId: themeIds });
+            expect(response.status).toEqual(200);
+            const receivedSquare: Square = response.body;
+            expect(Number.isInteger(receivedSquare.id)).toEqual(true);
+            expect(receivedSquare.text).toEqual(text);
+            expect(receivedSquare.themes).toEqual(themeEntries.filter(t => themeIds.includes(t.id)));
+        });
+
+        it("should add a square with multiple theme ids", async () => {
+            const text = "tinstafl";
+            const themeIds = getExistingThemeIds().slice(0, 2);
+            const response = await request(app).post(squareApi).send({ text, themeId: themeIds });
+            expect(response.status).toEqual(200);
+            const receivedSquare: Square = response.body;
+            expect(Number.isInteger(receivedSquare.id)).toEqual(true);
+            expect(receivedSquare.text).toEqual(text);
+            expect(receivedSquare.themes).toEqual(themeEntries.filter(t => themeIds.includes(t.id)));
+        });
+    });
+});
+
 describe("PUT /api/square", () => {
 
     describe("update square by id", () => {
@@ -184,7 +270,7 @@ describe("PUT /api/square", () => {
         });
 
         it("should return 400 Bad Request when text is longer than allowed", async () => {
-            const text = "".padEnd(1024, "1234567890");
+            const text = getTooLongText();
             const response = await request(app).put(squareApi).send({ id: squareEntries[0].id, text, themeId: [] });
             expect(response.status).toEqual(400);
         });

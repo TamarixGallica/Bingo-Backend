@@ -1,6 +1,9 @@
 import { Joi, schema } from "express-validation";
-import { idValidation } from "./shared";
+import { id, idValidation } from "./shared";
 
+export const text = Joi.string().max(255);
+
+export const themeId = Joi.array().items(id);
 
 export const squareQueryValidator: schema = {
     query: Joi.object({
@@ -9,16 +12,18 @@ export const squareQueryValidator: schema = {
     })
 };
 
+export const squareAddValidator: schema = {
+    body: Joi.object({
+        text: text.required(),
+        themeId
+    })
+};
+
 export const squareUpdateValidator: schema = {
     body: Joi.object({
-        id: Joi.number()
-        .integer()
-        .positive()
-        .required(),
-        text: Joi.string()
-        .max(255),
-        themeId: Joi.array()
-        .items(Joi.number().integer().positive())
+        id: id.required(),
+        text,
+        themeId
     }).or("text", "themeId")
 };
 
