@@ -50,6 +50,10 @@ export const getSquareById = async (id: number): Promise<Square|undefined> => {
     return squares[0];
 };
 
+export const updateSquareById = async (square: Square): Promise<void> => {
+    await knex(squareTableName).where({ id: square.id }).update({ text: square.text });
+};
+
 const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> => {
     const squares: Square[] = [];
     const themes: Theme[] = await themeService.getThemes({name: null});
@@ -74,4 +78,4 @@ const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> 
     return squares;
 };
 
-export default { getSquares, getSquareById };
+export default { getSquares, getSquareById, updateSquareById };

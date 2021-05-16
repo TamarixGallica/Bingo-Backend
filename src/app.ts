@@ -27,6 +27,7 @@ app.use(
 
 // Routes
 app.get("/api/square", validate(squareQueryValidator), squareRouter.getSquares);
+app.put("/api/square", squareRouter.updateSquare);
 app.get("/api/square/:id", validate(squareIdValidator), squareRouter.getSquareById);
 app.get("/api/theme", validate(themeQueryValidator) ,themeRouter.getThemes);
 app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);

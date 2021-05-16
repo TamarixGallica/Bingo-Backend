@@ -11,6 +11,22 @@ export const getSquares = async (req: Request, res: Response): Promise<void> => 
     res.json(squares);
 };
 
+export const updateSquare = async (req: Request, res: Response): Promise<void> => {
+    const id = parseInt(req.body.id, 10);
+
+    const squareFound = await squareService.getSquareById(id);
+
+    if (!squareFound)
+    {
+        return res.status(404).end();
+    }
+
+    await squareService.updateSquareById(req.body);
+
+    const updatedSquare = await squareService.getSquareById(id);
+    return res.json(updatedSquare).end();
+};
+
 export const getSquareById = async (req: Request, res: Response): Promise<void> => {
     const id = parseInt(req.params.id, 10);
 
@@ -26,4 +42,4 @@ export const getSquareById = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-export default { getSquares, getSquareById };
+export default { getSquares, getSquareById, updateSquare };
