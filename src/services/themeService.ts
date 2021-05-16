@@ -26,4 +26,9 @@ export const getThemeById = async (id: number): Promise<Theme|undefined> => {
     return themes.length !== 0 ? themes[0] : undefined;
 };
 
-export default { getThemes, getThemeById };
+export const getThemesById = async (id: number[]): Promise<Theme[]> => {
+    const themes = await knex.select(returnedProps).from<Theme>(tableName).whereIn("id", id);
+    return themes;
+};
+
+export default { getThemes, getThemeById, getThemesById };

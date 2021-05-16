@@ -16,9 +16,10 @@ export const squareUpdateValidator: schema = {
         .positive()
         .required(),
         text: Joi.string()
-        .max(255)
-        .required()
-    })
+        .max(255),
+        themeId: Joi.array()
+        .items(Joi.number().integer().positive())
+    }).or("text", "themeId")
 };
 
 export const squareIdValidator = Object.assign({}, idValidation);

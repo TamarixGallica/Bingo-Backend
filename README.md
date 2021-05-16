@@ -20,7 +20,7 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
       - [X] By identifier
       - [X] By search string
     - [ ] Create
-    - [ ] Update
+    - [X] Update
     - [ ] Delete
   - [ ] Themes
     - [X] Read
@@ -29,9 +29,9 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
     - [ ] Create
     - [ ] Update
     - [ ] Delete
-- [ ] API should expose an endpoint for assigning themes to Bingo squares
-  - [ ] Add a theme
-  - [ ] Remove a theme
+- [X] API should expose an endpoint for assigning themes to Bingo squares
+  - [X] Add a theme
+  - [X] Remove a theme
 
 ## Requirements
 

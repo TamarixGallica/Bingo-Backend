@@ -1,7 +1,8 @@
 "use strict";
 
 import { Request, Response } from "express";
-import squareService, { SquareQueryParams } from "../services/squareService";
+import themeService from "../services/themeService";
+import squareService, { SquareQueryParams, UpdateSquare } from "../services/squareService";
 
 export const getSquares = async (req: Request, res: Response): Promise<void> => {
     const queryParams: SquareQueryParams = {
@@ -21,7 +22,18 @@ export const updateSquare = async (req: Request, res: Response): Promise<void> =
         return res.status(404).end();
     }
 
-    await squareService.updateSquareById(req.body);
+    const squareToUpdate: UpdateSquare = req.body;
+
+    if (squareToUpdate.themeId?.length > 0)
+    {
+        const themes = await themeService.getThemesById(squareToUpdate.themeId);
+        if (squareToUpdate.themeId?.length > themes.length)
+        {
+            return res.status(400).end();
+        }
+    }
+
+    await squareService.updateSquareById(squareToUpdate);
 
     const updatedSquare = await squareService.getSquareById(id);
     return res.json(updatedSquare).end();

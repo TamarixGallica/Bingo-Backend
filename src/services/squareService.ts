@@ -8,6 +8,12 @@ export interface SquareQueryParams {
     text?: string;
 }
 
+export interface UpdateSquare {
+    id: number;
+    text?: string;
+    themeId?: number[]
+}
+
 interface SquareRow extends Square {
     theme_id?: number;
 }
@@ -50,8 +56,20 @@ export const getSquareById = async (id: number): Promise<Square|undefined> => {
     return squares[0];
 };
 
-export const updateSquareById = async (square: Square): Promise<void> => {
-    await knex(squareTableName).where({ id: square.id }).update({ text: square.text });
+export const updateSquareById = async (square: UpdateSquare): Promise<void> => {
+    if (square.text)
+    {
+        await knex(squareTableName).where({ id: square.id }).update({ text: square.text });
+    }
+
+    if (square.themeId)
+    {
+        await knex(squaresThemesTableName).where({ square_id: square.id }).delete();
+        if (square.themeId.length > 0) {
+            const rowsToAdd = square.themeId.map((themeId) => ({ square_id: square.id, theme_id: themeId}));
+            await knex(squaresThemesTableName).insert(rowsToAdd);
+        }
+    }
 };
 
 const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> => {
