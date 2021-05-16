@@ -9,4 +9,16 @@ export const squareQueryValidator: schema = {
     })
 };
 
+export const squareUpdateValidator: schema = {
+    body: Joi.object({
+        id: Joi.number()
+        .integer()
+        .positive()
+        .required(),
+        text: Joi.string()
+        .max(255)
+        .required()
+    })
+};
+
 export const squareIdValidator = Object.assign({}, idValidation);

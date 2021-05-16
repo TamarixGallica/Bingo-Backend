@@ -164,6 +164,27 @@ describe("PUT /api/square", () => {
             expect(response.status).toEqual(404);
         });
 
+        it("should return 400 Bad Request when non-number is used as id", async () => {
+            const response = await request(app).put(squareApi).send({ id: "abc", text: "foo" });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when negative number is used as id", async () => {
+            const response = await request(app).put(squareApi).send({ id: -1, text: "foo" });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when text is missing", async () => {
+            const response = await request(app).put(squareApi).send({ id: squareEntries[0].id });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when text is longer than allowed", async () => {
+            const text = "".padEnd(1024, "1234567890");
+            const response = await request(app).put(squareApi).send({ id: squareEntries[0].id, text });
+            expect(response.status).toEqual(400);
+        });
+
         it("should update text for square in database", async () => {
             const square = squareEntries[1];
             const newText = "lorem ipsum dolor sit amet";
