@@ -334,3 +334,52 @@ describe("PUT /api/square", () => {
         });
     });
 });
+
+describe("DELETE /api/square", () => {
+
+    describe("validate requests", () => {
+
+        it("should return 404 Not Found when updating a square not in database", async () => {
+            const id = getNonExistingSquareId();
+            const response = await request(app).delete(`${squareApi}/${id}`);
+            expect(response.status).toEqual(404);
+        });
+
+        it("should return 400 Bad Request when non-number is used as id", async () => {
+            const response = await request(app).delete(`${squareApi}/abc`);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when negative number is used as id", async () => {
+            const response = await request(app).delete(`${squareApi}/-1`);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 204 No Content on successful delete", async () => {
+            const id = squareEntries[2].id;
+            const response = await request(app).delete(`${squareApi}/${id}`);
+            expect(response.status).toEqual(204);
+        });
+    });
+
+    describe("delete a square", () => {
+
+        it("the number of squares should decrease by one on successful delete", async () => {
+            const id = squareEntries[1].id;
+            const originalGetResponse = await request(app).get(squareApi);
+            const deleteResponse = await request(app).delete(`${squareApi}/${id}`);
+            const newGetResponse = await request(app).get(squareApi);
+            expect(deleteResponse.status).toEqual(204);
+            expect(originalGetResponse.body.length - newGetResponse.body.length).toEqual(1);
+        });
+
+        it("deleted square should not be found by id after successful delete", async () => {
+            const id = squareEntries[2].id;
+            const deleteResponse = await request(app).delete(`${squareApi}/${id}`);
+            const getResponse = await request(app).get(`${squareApi}/${id}`);
+            expect(deleteResponse.status).toEqual(204);
+            expect(getResponse.status).toEqual(404);
+        });
+
+    });
+});

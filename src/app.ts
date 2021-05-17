@@ -30,6 +30,7 @@ app.get("/api/square", validate(squareQueryValidator), squareRouter.getSquares);
 app.post("/api/square", validate(squareAddValidator), squareRouter.addSquare);
 app.put("/api/square", validate(squareUpdateValidator), squareRouter.updateSquare);
 app.get("/api/square/:id", validate(squareIdValidator), squareRouter.getSquareById);
+app.delete("/api/square/:id", validate(squareIdValidator), squareRouter.deleteSquareById);
 app.get("/api/theme", validate(themeQueryValidator) ,themeRouter.getThemes);
 app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);
 

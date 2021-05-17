@@ -15,13 +15,13 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
   - If enough squares aren't available for the requested parameters, 404 Not Found should be returned
   - The order of squares should be randomized
 - [ ] API should expose an endpoint for reading, creating, updating and deleting 
-  - [ ] Bingo squares
+  - [X] Bingo squares
     - [X] Read
       - [X] By identifier
       - [X] By search string
     - [X] Create
     - [X] Update
-    - [ ] Delete
+    - [X] Delete
   - [ ] Themes
     - [X] Read
       - [X] By identifier

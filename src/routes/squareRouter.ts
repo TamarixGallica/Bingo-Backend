@@ -73,4 +73,19 @@ export const getSquareById = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-export default { getSquares, getSquareById, updateSquare, addSquare };
+export const deleteSquareById = async (req: Request, res: Response): Promise<void> => {
+    const id = parseInt(req.params.id, 10);
+
+    const success = await squareService.deleteSquareById(id);
+
+    if (success)
+    {
+        return res.status(204).end();
+    }
+    else
+    {
+        return res.status(404).end();
+    }
+};
+
+export default { getSquares, getSquareById, updateSquare, addSquare, deleteSquareById };

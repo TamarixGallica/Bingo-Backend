@@ -89,6 +89,12 @@ export const updateSquareById = async (square: UpdateSquare): Promise<void> => {
     }
 };
 
+export const deleteSquareById = async (id: number): Promise<boolean> => {
+    const deletedRows = await knex(squareTableName).where("id", id).delete();
+
+    return deletedRows === 1;
+};
+
 const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> => {
     const squares: Square[] = [];
     const themes: Theme[] = await themeService.getThemes({name: null});
@@ -113,4 +119,4 @@ const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> 
     return squares;
 };
 
-export default { getSquares, getSquareById, updateSquareById, addSquare };
+export default { getSquares, getSquareById, updateSquareById, addSquare, deleteSquareById };
