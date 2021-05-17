@@ -7,6 +7,10 @@ export interface ThemeQueryParams {
     name?: string;
 }
 
+export interface AddTheme {
+    name: string;
+}
+
 const tableName = "themes";
 const returnedProps = ["id", "name"];
 
@@ -31,4 +35,9 @@ export const getThemesById = async (id: number[]): Promise<Theme[]> => {
     return themes;
 };
 
-export default { getThemes, getThemeById, getThemesById };
+export const addTheme = async (theme: AddTheme): Promise<number> => {
+    const id = await knex(tableName).insert({ name: theme.name }, "id");
+    return id[0];
+};
+
+export default { getThemes, getThemeById, getThemesById, addTheme };

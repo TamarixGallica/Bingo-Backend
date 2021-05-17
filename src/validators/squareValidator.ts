@@ -1,7 +1,5 @@
 import { Joi, schema } from "express-validation";
-import { id, idValidation } from "./shared";
-
-export const text = Joi.string().max(255);
+import { id, idValidation, text } from "./shared";
 
 export const themeId = Joi.array().items(id);
 

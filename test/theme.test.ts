@@ -3,6 +3,7 @@ import app from "../src/app";
 import knex from "../src/services/knexService";
 import { Theme } from "../src/models";
 import { themeEntries } from "../db/seeds/001_squares_and_themes";
+import { getTooLongText } from "./shared";
 
 const themeApi = "/api/theme";
 
@@ -128,6 +129,64 @@ describe("GET /api/theme", () => {
             const id = Math.max(...themeEntries.map(x => x.id)) + 1;
             const response = await request(app).get(`${themeApi}/${id}`);
             expect(response.status).toEqual(404);
+        });
+    });
+});
+
+describe("POST /api/theme", () => {
+
+    describe("validate requests", () => {
+
+        it("should return 400 Bad Request when using an empty body", async () => {
+            const response = await request(app).post(themeApi).send();
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when supplying id and name", async () => {
+            const response = await request(app).post(themeApi).send({ id: 1, name: "foo" });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when name is undefined", async () => {
+            const response = await request(app).post(themeApi).send({ name: undefined });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when name is longer than allowed", async () => {
+            const name = getTooLongText();
+            const response = await request(app).post(themeApi).send({ name });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 200 when text is supplied", async () => {
+            const response = await request(app).post(themeApi).send({ name: "foo" });
+            expect(response.status).toEqual(200);
+        });
+    });
+
+    describe("add a square", () => {
+
+        it("should add a theme with name", async () => {
+            const name = "testing";
+            const response = await request(app).post(themeApi).send({ name });
+            const theme: Theme = response.body;
+            expect(response.status).toEqual(200);
+            expect(Number.isInteger(theme.id)).toEqual(true);
+            expect(theme.name).toEqual(name);
+        });
+
+        it("added theme should appear in the list of themes after adding", async () => {
+            const name = "testing is fun";
+
+            const addResponse = await request(app).post(themeApi).send({ name });
+            const id = addResponse.body.id;
+            expect(addResponse.status).toEqual(200);
+
+            const getResponse = await request(app).get(themeApi);
+            const themes: Theme[] = getResponse.body;
+            const addedTheme = themes.find(x => x.name === name);
+            expect(addedTheme.id).toEqual(id);
+            expect(addedTheme.name).toEqual(name);
         });
     });
 });
