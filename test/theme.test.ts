@@ -3,7 +3,7 @@ import app from "../src/app";
 import knex from "../src/services/knexService";
 import { Theme } from "../src/models";
 import { themeEntries } from "../db/seeds/001_squares_and_themes";
-import { getTooLongText } from "./shared";
+import { getNonExistingThemeId, getTooLongText } from "./shared";
 
 const themeApi = "/api/theme";
 
@@ -164,7 +164,7 @@ describe("POST /api/theme", () => {
         });
     });
 
-    describe("add a square", () => {
+    describe("add a theme", () => {
 
         it("should add a theme with name", async () => {
             const name = "testing";
@@ -187,6 +187,65 @@ describe("POST /api/theme", () => {
             const addedTheme = themes.find(x => x.name === name);
             expect(addedTheme.id).toEqual(id);
             expect(addedTheme.name).toEqual(name);
+        });
+    });
+});
+
+describe("PUT /api/theme", () => {
+
+    describe("update theme by id", () => {
+
+        it("should return 404 Not Found when updating a theme not in database", async () => {
+            const id = getNonExistingThemeId();
+            const theme: Theme = { id, name: "bar" };
+            const response = await request(app).put(themeApi).send(theme);
+            expect(response.status).toEqual(404);
+        });
+
+        it("should return 400 Bad Request when non-number is used as id", async () => {
+            interface ThemeWithStringId extends Omit<Theme, "id"> { id: string }
+            const theme: ThemeWithStringId = {
+                id: "abc",
+                name: "foo"
+            };
+            const response = await request(app).put(themeApi).send(theme);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when negative number is used as id", async () => {
+            const theme: Theme = {
+                id: -1,
+                name: "bar"
+            };
+            const response = await request(app).put(themeApi).send(theme);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when name is missing", async () => {
+            const theme: Omit<Theme, "name"> = {
+                id: themeEntries[0].id
+            };
+            const response = await request(app).put(themeApi).send(theme);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when name is longer than allowed", async () => {
+            const theme: Theme = {
+                id: themeEntries[0].id,
+                name: getTooLongText()
+            };
+            const response = await request(app).put(themeApi).send(theme);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should update name for theme in database", async () => {
+            const theme = themeEntries[1];
+            const newName = "Theme 2.0";
+            const response = await request(app).put(themeApi).send({ id: theme.id, name:  newName});
+            expect(response.status).toEqual(200);
+            const receivedTheme: Theme = response.body;
+            expect(receivedTheme.id).toEqual(theme.id);
+            expect(receivedTheme.name).toEqual(newName);
         });
     });
 });

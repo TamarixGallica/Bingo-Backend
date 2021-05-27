@@ -11,6 +11,11 @@ export interface AddTheme {
     name: string;
 }
 
+export interface UpdateTheme {
+    id: number;
+    name: string;
+}
+
 const tableName = "themes";
 const returnedProps = ["id", "name"];
 
@@ -40,4 +45,9 @@ export const addTheme = async (theme: AddTheme): Promise<number> => {
     return id[0];
 };
 
-export default { getThemes, getThemeById, getThemesById, addTheme };
+export const updateThemeById = async (theme: UpdateTheme): Promise<void> => {
+    await knex(tableName).where({ id: theme.id }).update({ name: theme.name });
+};
+
+
+export default { getThemes, getThemeById, getThemesById, addTheme, updateThemeById };

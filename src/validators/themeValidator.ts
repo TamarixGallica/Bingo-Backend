@@ -1,5 +1,5 @@
 import { Joi, schema } from "express-validation";
-import { idValidation, text } from "./shared";
+import { id, idValidation, text } from "./shared";
 
 export const themeQueryValidator: schema = {
     query: Joi.object({
@@ -14,5 +14,11 @@ export const themeAddValidator: schema = {
     })
 };
 
+export const themeUpdateValidator: schema = {
+    body: Joi.object({
+        id: id.required(),
+        name: text.required()
+    })
+};
 
 export const themeIdValidator = Object.assign({}, idValidation);

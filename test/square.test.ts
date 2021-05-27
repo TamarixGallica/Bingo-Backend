@@ -3,7 +3,7 @@ import app from "../src/app";
 import knex from "../src/services/knexService";
 import { Square } from "../src/models";
 import { squareEntries, themeEntries } from "../db/seeds/001_squares_and_themes";
-import { getTooLongText } from "./shared";
+import { getNonExistingThemeId, getTooLongText } from "./shared";
 
 const squareApi = "/api/square";
 
@@ -19,8 +19,6 @@ beforeEach(async () => {
 const getNonExistingSquareId = () => Math.max(...squareEntries.map(x => x.id)) + 1;
 
 const getExistingThemeIds = () => themeEntries.map(x => x.id);
-
-const getNonExistingThemeId = () => Math.max(...themeEntries.map(x => x.id)) + 1;
 
 describe("GET /api/square", () => {
 

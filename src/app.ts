@@ -9,7 +9,7 @@ import squareRouter from "./routes/squareRouter";
 import themeRouter from "./routes/themeRouter";
 
 // Request validators
-import { themeAddValidator, squareIdValidator, squareQueryValidator, squareUpdateValidator, themeIdValidator, themeQueryValidator, squareAddValidator } from "./validators";
+import { themeAddValidator, squareIdValidator, squareQueryValidator, squareUpdateValidator, themeIdValidator, themeQueryValidator, squareAddValidator, themeUpdateValidator } from "./validators";
 
 // Create Express server
 const app = express();
@@ -34,6 +34,7 @@ app.delete("/api/square/:id", validate(squareIdValidator), squareRouter.deleteSq
 app.get("/api/theme", validate(themeQueryValidator) ,themeRouter.getThemes);
 app.post("/api/theme", validate(themeAddValidator), themeRouter.addTheme);
 app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);
+app.put("/api/theme", validate(themeUpdateValidator), themeRouter.updateTheme);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {

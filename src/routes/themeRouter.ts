@@ -1,7 +1,7 @@
 "use strict";
 
 import { Request, Response } from "express";
-import themeService, { AddTheme, ThemeQueryParams } from "../services/themeService";
+import themeService, { AddTheme, ThemeQueryParams, UpdateTheme } from "../services/themeService";
 
 export const getThemes = async (req: Request, res: Response): Promise<void> => {
     const queryParams: ThemeQueryParams = {
@@ -36,5 +36,23 @@ export const addTheme = async (req: Request, res: Response): Promise<void> => {
     return res.json(theme).end();
 };
 
+export const updateTheme = async (req: Request, res: Response): Promise<void> => {
+    const id = parseInt(req.body.id, 10);
 
-export default { getThemes, getThemeById, addTheme };
+    const themeFound = await themeService.getThemeById(id);
+
+    if (!themeFound)
+    {
+        return res.status(404).end();
+    }
+
+    const themeToUpdate: UpdateTheme = req.body;
+
+    await themeService.updateThemeById(themeToUpdate);
+
+    const updatedTheme = await themeService.getThemeById(id);
+
+    return res.json(updatedTheme).end();
+};
+
+export default { getThemes, getThemeById, addTheme, updateTheme };
