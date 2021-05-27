@@ -18,8 +18,13 @@ export const squareAddValidator: schema = {
 };
 
 export const squareUpdateValidator: schema = {
+    params: Joi.object({
+        id: id.required()
+    }),
     body: Joi.object({
-        id: id.required(),
+        id: id
+            .valid(Joi.ref("$params.id", { adjust: (id) => parseInt(id) }))
+            .required(),
         text,
         themeId
     }).or("text", "themeId")

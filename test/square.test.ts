@@ -243,89 +243,106 @@ describe("POST /api/square", () => {
 
 describe("PUT /api/square", () => {
 
-    describe("update square by id", () => {
+    describe("validate requests", () => {
 
         it("should return 404 Not Found when updating a square not in database", async () => {
             const id = getNonExistingSquareId();
-            const response = await request(app).put(squareApi).send({ id, text: "bar", themeId: [] });
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: "bar", themeId: [] });
             expect(response.status).toEqual(404);
         });
 
         it("should return 400 Bad Request when non-number is used as id", async () => {
-            const response = await request(app).put(squareApi).send({ id: "abc", text: "foo", themeId: [] });
+            const id = "abc";
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: "foo", themeId: [] });
             expect(response.status).toEqual(400);
         });
 
         it("should return 400 Bad Request when negative number is used as id", async () => {
-            const response = await request(app).put(squareApi).send({ id: -1, text: "foo", themeId: [] });
+            const id = -1;
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: "foo", themeId: [] });
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when parameter id and body id don't match", async () => {
+            const id1 = squareEntries[0].id;
+            const id2 = squareEntries[1].id;
+            const response = await request(app).put(`${squareApi}/${id1}`).send({ id: id2, text: "foo" });
             expect(response.status).toEqual(400);
         });
 
         it("should return 400 Bad Request when text and theme id array are missing", async () => {
-            const response = await request(app).put(squareApi).send({ id: squareEntries[0].id });
+            const id = squareEntries[0].id;
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id });
             expect(response.status).toEqual(400);
         });
 
         it("should return 400 Bad Request when text is longer than allowed", async () => {
+            const id = squareEntries[0].id;
             const text = getTooLongText();
-            const response = await request(app).put(squareApi).send({ id: squareEntries[0].id, text, themeId: [] });
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text, themeId: [] });
             expect(response.status).toEqual(400);
         });
 
         it("should return 400 Bad Request when non-existing theme id is used", async () => {
+            const id = squareEntries[0].id;
             const newThemeIds = [getNonExistingThemeId()];
-            const response = await request(app).put(squareApi).send({ id: squareEntries[0].id, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(400);
         });
+    });
+
+    describe("update square by id", () => {
 
         it("should update text for square in database", async () => {
-            const square = squareEntries[1];
+            const id = squareEntries[1].id;
             const newText = "lorem ipsum dolor sit amet";
-            const response = await request(app).put(squareApi).send({ id: square.id, text:  newText});
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: newText});
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
-            expect(receivedSquare.id).toEqual(square.id);
+            expect(receivedSquare.id).toEqual(id);
             expect(receivedSquare.text).toEqual(newText);
         });
 
         it("should add themes for square in database", async () => {
-            const square = squareEntries[2];
+            const id = squareEntries[2].id;
             const newThemeIds = getExistingThemeIds().filter(x => x % 2 == 0);
-            const response = await request(app).put(squareApi).send({ id: square.id, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
-            expect(receivedSquare.id).toEqual(square.id);
+            expect(receivedSquare.id).toEqual(id);
             expect(receivedSquare.themes.map(x => x.id)).toEqual(newThemeIds);
         });
 
         it("should remove themes for square in database", async () => {
-            const square = squareEntries[0];
+            const id = squareEntries[0].id;
             const newThemeIds = [];
-            const response = await request(app).put(squareApi).send({ id: square.id, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
-            expect(receivedSquare.id).toEqual(square.id);
+            expect(receivedSquare.id).toEqual(id);
             expect(receivedSquare.themes.map(x => x.id)).toEqual(newThemeIds);
         });
 
         it("should replace themes for square in database", async () => {
             const square = squareEntries[0];
+            const id = square.id;
             const newThemeIds = getExistingThemeIds().filter(x => !square.themes.map(t => t.id).includes(x));
-            const response = await request(app).put(squareApi).send({ id: square.id, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
-            expect(receivedSquare.id).toEqual(square.id);
+            expect(receivedSquare.id).toEqual(id);
             expect(receivedSquare.themes.map(x => x.id)).toEqual(newThemeIds);
         });
 
         it("should update text and themes for square in database", async () => {
             const square = squareEntries[0];
+            const id = square.id;
             const newThemeIds = [square.themes[0].id];
             const newText = "the new text";
-            const response = await request(app).put(squareApi).send({ id: square.id, text: newText, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: newText, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
-            expect(receivedSquare.id).toEqual(square.id);
+            expect(receivedSquare.id).toEqual(id);
             expect(receivedSquare.text).toEqual(newText);
             expect(receivedSquare.themes.map(x => x.id)).toEqual(newThemeIds);
         });
