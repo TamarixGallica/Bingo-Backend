@@ -55,4 +55,19 @@ export const updateTheme = async (req: Request, res: Response): Promise<void> =>
     return res.json(updatedTheme).end();
 };
 
-export default { getThemes, getThemeById, addTheme, updateTheme };
+export const deleteThemeById = async (req: Request, res: Response): Promise<void> => {
+    const id = parseInt(req.params.id, 10);
+
+    const success = await themeService.deleteThemeById(id);
+
+    if (success)
+    {
+        return res.status(204).end();
+    }
+    else
+    {
+        return res.status(404).end();
+    }
+};
+
+export default { getThemes, getThemeById, addTheme, updateTheme, deleteThemeById };

@@ -249,3 +249,52 @@ describe("PUT /api/theme", () => {
         });
     });
 });
+
+describe("DELETE /api/theme", () => {
+
+    describe("validate requests", () => {
+
+        it("should return 404 Not Found when updating a theme not in database", async () => {
+            const id = getNonExistingThemeId();
+            const response = await request(app).delete(`${themeApi}/${id}`);
+            expect(response.status).toEqual(404);
+        });
+
+        it("should return 400 Bad Request when non-number is used as id", async () => {
+            const response = await request(app).delete(`${themeApi}/abc`);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when negative number is used as id", async () => {
+            const response = await request(app).delete(`${themeApi}/-1`);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 204 No Content on successful delete", async () => {
+            const id = themeEntries[2].id;
+            const response = await request(app).delete(`${themeApi}/${id}`);
+            expect(response.status).toEqual(204);
+        });
+    });
+
+    describe("delete a theme", () => {
+
+        it("the number of themes should decrease by one on successful delete", async () => {
+            const id = themeEntries[2].id;
+            const originalGetResponse = await request(app).get(themeApi);
+            const deleteResponse = await request(app).delete(`${themeApi}/${id}`);
+            const newGetResponse = await request(app).get(themeApi);
+            expect(deleteResponse.status).toEqual(204);
+            expect(originalGetResponse.body.length - newGetResponse.body.length).toEqual(1);
+        });
+
+        it("deleted theme should not be found by id after successful delete", async () => {
+            const id = themeEntries[2].id;
+            const deleteResponse = await request(app).delete(`${themeApi}/${id}`);
+            const getResponse = await request(app).get(`${themeApi}/${id}`);
+            expect(deleteResponse.status).toEqual(204);
+            expect(getResponse.status).toEqual(404);
+        });
+
+    });
+});

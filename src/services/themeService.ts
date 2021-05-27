@@ -49,5 +49,10 @@ export const updateThemeById = async (theme: UpdateTheme): Promise<void> => {
     await knex(tableName).where({ id: theme.id }).update({ name: theme.name });
 };
 
+export const deleteThemeById = async (id: number): Promise<boolean> => {
+    const deletedRows = await knex(tableName).where("id", id).delete();
 
-export default { getThemes, getThemeById, getThemesById, addTheme, updateThemeById };
+    return deletedRows === 1;
+};
+
+export default { getThemes, getThemeById, getThemesById, addTheme, updateThemeById, deleteThemeById };
