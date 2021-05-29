@@ -16,6 +16,11 @@ beforeEach(async () => {
     await knex.seed.run();
 });
 
+const getAllThemes = async () => {
+    const response = await request(app).get(themeApi);
+    return response.body;
+};
+
 describe("GET /api/theme", () => {
 
     describe("retrieve all themes", () => {
@@ -35,16 +40,14 @@ describe("GET /api/theme", () => {
             expect(Array.isArray(response.body)).toEqual(true);
         });
 
-        it("should return all themes with correct data", async () => {
+        it("should return all themes with expected names", async () => {
             const response = await request(app).get(themeApi);
             const returnedThemes: Theme[] = response.body;
             expect(returnedThemes.length).toEqual(themeEntries.length);
             for (const theme of themeEntries)
             {
-                const returnedTheme = returnedThemes.find(x => x.id == theme.id);
-                expect(returnedTheme).not.toBeNull();
-                expect(returnedTheme.id).toEqual(theme.id);
-                expect(returnedTheme.name).toEqual(theme.name);
+                const returnedTheme = returnedThemes.find(x => x.name == theme.name);
+                expect(returnedTheme).not.toBeUndefined();
             }
         });
     });
@@ -96,19 +99,22 @@ describe("GET /api/theme", () => {
     describe("retrieve theme by id", () => {
 
         it("should return 200 OK for theme in database", async () => {
-            const theme = themeEntries[0];
+            const allThemes = await getAllThemes();
+            const theme = allThemes[0];
             const response = await request(app).get(`${themeApi}/${theme.id}`);
             expect(response.status).toEqual(200);
         });
 
         it("should return json for theme in database", async () => {
-            const theme = themeEntries[0];
+            const allThemes = await getAllThemes();
+            const theme = allThemes[1];
             const response = await request(app).get(`${themeApi}/${theme.id}`);
             expect(response.type).toEqual("application/json");
         });
 
         it("should return theme with correct data", async () => {
-            const theme = themeEntries[0];
+            const allThemes = await getAllThemes();
+            const theme = allThemes[2];
             const response = await request(app).get(`${themeApi}/${theme.id}`);
             const receivedTheme: Theme = response.body;
             expect(receivedTheme.id).toEqual(theme.id);
@@ -126,7 +132,8 @@ describe("GET /api/theme", () => {
         });
 
         it("should return 404 Not Found for theme not in database", async () => {
-            const id = Math.max(...themeEntries.map(x => x.id)) + 1;
+            const allThemes = await getAllThemes();
+            const id = Math.max(...allThemes.map(x => x.id)) + 1;
             const response = await request(app).get(`${themeApi}/${id}`);
             expect(response.status).toEqual(404);
         });
