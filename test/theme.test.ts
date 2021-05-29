@@ -3,9 +3,7 @@ import app from "../src/app";
 import knex from "../src/services/knexService";
 import { Theme } from "../src/models";
 import { themeEntries } from "../db/seeds/001_squares_and_themes";
-import { getNonExistingThemeId, getTooLongText } from "./shared";
-
-const themeApi = "/api/theme";
+import { getAllThemes, getNonExistingThemeId, getTooLongText, themeApi } from "./shared";
 
 beforeAll(async () => {
     await knex.migrate.rollback(null, true);
@@ -15,11 +13,6 @@ beforeAll(async () => {
 beforeEach(async () => {
     await knex.seed.run();
 });
-
-const getAllThemes = async () => {
-    const response = await request(app).get(themeApi);
-    return response.body;
-};
 
 describe("GET /api/theme", () => {
 
@@ -203,7 +196,7 @@ describe("PUT /api/theme", () => {
     describe("validate requests", () => {
 
         it("should return 404 Not Found when updating a theme not in database", async () => {
-            const id = getNonExistingThemeId();
+            const id = await getNonExistingThemeId();
             const theme: Theme = { id, name: "bar" };
             const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
             expect(response.status).toEqual(404);
@@ -272,7 +265,7 @@ describe("DELETE /api/theme", () => {
     describe("validate requests", () => {
 
         it("should return 404 Not Found when updating a theme not in database", async () => {
-            const id = getNonExistingThemeId();
+            const id = await getNonExistingThemeId();
             const response = await request(app).delete(`${themeApi}/${id}`);
             expect(response.status).toEqual(404);
         });
