@@ -34,7 +34,7 @@ app.delete("/api/square/:id", validate(squareIdValidator), squareRouter.deleteSq
 app.get("/api/theme", validate(themeQueryValidator) ,themeRouter.getThemes);
 app.post("/api/theme", validate(themeAddValidator), themeRouter.addTheme);
 app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);
-app.put("/api/theme", validate(themeUpdateValidator), themeRouter.updateTheme);
+app.put("/api/theme/:id", validate(themeUpdateValidator, { context: true }), themeRouter.updateTheme);
 app.delete("/api/theme/:id", validate(themeIdValidator), themeRouter.deleteThemeById);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

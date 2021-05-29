@@ -15,8 +15,13 @@ export const themeAddValidator: schema = {
 };
 
 export const themeUpdateValidator: schema = {
+    params: Joi.object({
+        id: id.required()
+    }),
     body: Joi.object({
-        id: id.required(),
+        id: id
+            .valid(Joi.ref("$params.id", { adjust: (id) => parseInt(id) }))
+            .required(),
         name: text.required()
     })
 };

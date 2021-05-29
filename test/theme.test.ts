@@ -193,12 +193,12 @@ describe("POST /api/theme", () => {
 
 describe("PUT /api/theme", () => {
 
-    describe("update theme by id", () => {
+    describe("validate requests", () => {
 
         it("should return 404 Not Found when updating a theme not in database", async () => {
             const id = getNonExistingThemeId();
             const theme: Theme = { id, name: "bar" };
-            const response = await request(app).put(themeApi).send(theme);
+            const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
             expect(response.status).toEqual(404);
         });
 
@@ -208,7 +208,7 @@ describe("PUT /api/theme", () => {
                 id: "abc",
                 name: "foo"
             };
-            const response = await request(app).put(themeApi).send(theme);
+            const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
             expect(response.status).toEqual(400);
         });
 
@@ -217,7 +217,14 @@ describe("PUT /api/theme", () => {
                 id: -1,
                 name: "bar"
             };
-            const response = await request(app).put(themeApi).send(theme);
+            const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when parameter id and body id don't match", async () => {
+            const id1 = themeEntries[0].id;
+            const id2 = themeEntries[1].id;
+            const response = await request(app).put(`${themeApi}/${id1}`).send({ id: id2, text: "foo" });
             expect(response.status).toEqual(400);
         });
 
@@ -225,7 +232,7 @@ describe("PUT /api/theme", () => {
             const theme: Omit<Theme, "name"> = {
                 id: themeEntries[0].id
             };
-            const response = await request(app).put(themeApi).send(theme);
+            const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
             expect(response.status).toEqual(400);
         });
 
@@ -234,14 +241,17 @@ describe("PUT /api/theme", () => {
                 id: themeEntries[0].id,
                 name: getTooLongText()
             };
-            const response = await request(app).put(themeApi).send(theme);
+            const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
             expect(response.status).toEqual(400);
         });
+    });
+
+    describe("update theme by id", () => {
 
         it("should update name for theme in database", async () => {
             const theme = themeEntries[1];
             const newName = "Theme 2.0";
-            const response = await request(app).put(themeApi).send({ id: theme.id, name:  newName});
+            const response = await request(app).put(`${themeApi}/${theme.id}`).send({ id: theme.id, name:  newName});
             expect(response.status).toEqual(200);
             const receivedTheme: Theme = response.body;
             expect(receivedTheme.id).toEqual(theme.id);
