@@ -12,10 +12,6 @@ beforeAll(async () => {
     await knex.migrate.latest();
 });
 
-beforeEach(async () => {
-    await knex.seed.run();
-});
-
 const getAllSquares = async (): Promise<Square[]> => {
     const response = await request(app).get(squareApi);
     return response.body;
@@ -32,9 +28,11 @@ const getExistingThemeIds = async (): Promise<number[]> => {
 };
 
 describe("GET /api/square", () => {
+    beforeAll(async () => {
+        await knex.seed.run();
+    });
 
     describe("retrieve all squares", () => {
-
         it("should return 200 OK", async () => {
             const response = await request(app).get(squareApi);
             expect(response.status).toEqual(200);
@@ -76,11 +74,10 @@ describe("GET /api/square", () => {
                     expect(returnedTheme.name).toEqual(theme.name);
                 });
             }
-        });    
+        });
     });
 
     describe("filter based on text", () => {
-
         it("should allow only a string as a text filter", async () => {
             const response1 = await request(app).get(squareApi).query({ text: ["foo", "bar"]});
             expect(response1.status).toEqual(400);
@@ -121,7 +118,6 @@ describe("GET /api/square", () => {
     });
 
     describe("retrieve square by id", () => {
-
         it("should return 200 OK for square in database", async () => {
             const allSquares = await getAllSquares();
             const square = allSquares[0];
@@ -177,8 +173,10 @@ describe("GET /api/square", () => {
 });
 
 describe("POST /api/square", () => {
-
     describe("validate requests", () => {
+        beforeAll(async () => {
+            await knex.seed.run();
+        });
 
         it("should return 400 Bad Request when using an empty body", async () => {
             const response = await request(app).post(squareApi).send();
@@ -215,6 +213,9 @@ describe("POST /api/square", () => {
     });
 
     describe("add a square", () => {
+        beforeEach(async () => {
+            await knex.seed.run();
+        });
 
         it("should add a square without theme id array", async () => {
             const text = "foobar";
@@ -264,8 +265,10 @@ describe("POST /api/square", () => {
 });
 
 describe("PUT /api/square", () => {
-
     describe("validate requests", () => {
+        beforeAll(async () => {
+            await knex.seed.run();
+        });
 
         it("should return 404 Not Found when updating a square not in database", async () => {
             const id = await getNonExistingSquareId();
@@ -317,6 +320,9 @@ describe("PUT /api/square", () => {
     });
 
     describe("update square by id", () => {
+        beforeEach(async () => {
+            await knex.seed.run();
+        });
 
         it("should update text for square in database", async () => {
             const allSquares = await getAllSquares();
@@ -380,8 +386,10 @@ describe("PUT /api/square", () => {
 });
 
 describe("DELETE /api/square", () => {
-
     describe("validate requests", () => {
+        beforeAll(async () => {
+            await knex.seed.run();
+        });
 
         it("should return 404 Not Found when updating a square not in database", async () => {
             const id = await getNonExistingSquareId();
@@ -408,6 +416,9 @@ describe("DELETE /api/square", () => {
     });
 
     describe("delete a square", () => {
+        beforeEach(async () => {
+            await knex.seed.run();
+        });
 
         it("the number of squares should decrease by one on successful delete", async () => {
             const allSquares = await getAllSquares();
@@ -427,6 +438,5 @@ describe("DELETE /api/square", () => {
             expect(deleteResponse.status).toEqual(204);
             expect(getResponse.status).toEqual(404);
         });
-
     });
 });

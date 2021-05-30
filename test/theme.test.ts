@@ -10,14 +10,12 @@ beforeAll(async () => {
     await knex.migrate.latest();
 });
 
-beforeEach(async () => {
-    await knex.seed.run();
-});
-
 describe("GET /api/theme", () => {
+    beforeAll(async () => {
+        await knex.seed.run();
+    });
 
     describe("retrieve all themes", () => {
-        
         it("should return 200 OK", async () => {
             const response = await request(app).get(themeApi);
             expect(response.status).toEqual(200);
@@ -46,7 +44,6 @@ describe("GET /api/theme", () => {
     });
 
     describe("filter based on text", () => {
-
         it("should allow only a string as a name filter", async () => {
             const response1 = await request(app).get(themeApi).query({ name: ["foo", "bar"]});
             expect(response1.status).toEqual(400);
@@ -87,7 +84,6 @@ describe("GET /api/theme", () => {
     });
 
     describe("retrieve theme by id", () => {
-
         it("should return 200 OK for theme in database", async () => {
             const allThemes = await getAllThemes();
             const theme = allThemes[0];
@@ -131,8 +127,10 @@ describe("GET /api/theme", () => {
 });
 
 describe("POST /api/theme", () => {
-
     describe("validate requests", () => {
+        beforeAll(async () => {
+            await knex.seed.run();
+        });
 
         it("should return 400 Bad Request when using an empty body", async () => {
             const response = await request(app).post(themeApi).send();
@@ -162,8 +160,11 @@ describe("POST /api/theme", () => {
     });
 
     describe("add a theme", () => {
+        beforeEach(async () => {
+            await knex.seed.run();
+        });
 
-        it("should add a theme with name", async () => {
+            it("should add a theme with name", async () => {
             const name = "testing";
             const response = await request(app).post(themeApi).send({ name });
             const theme: Theme = response.body;
@@ -189,8 +190,10 @@ describe("POST /api/theme", () => {
 });
 
 describe("PUT /api/theme", () => {
-
     describe("validate requests", () => {
+        beforeAll(async () => {
+            await knex.seed.run();
+        });
 
         it("should return 404 Not Found when updating a theme not in database", async () => {
             const id = await getNonExistingThemeId();
@@ -244,6 +247,9 @@ describe("PUT /api/theme", () => {
     });
 
     describe("update theme by id", () => {
+        beforeEach(async () => {
+            await knex.seed.run();
+        });
 
         it("should update name for theme in database", async () => {
             const allThemes = await getAllThemes();
@@ -259,8 +265,10 @@ describe("PUT /api/theme", () => {
 });
 
 describe("DELETE /api/theme", () => {
-
     describe("validate requests", () => {
+        beforeAll(async () => {
+            await knex.seed.run();
+        });
 
         it("should return 404 Not Found when updating a theme not in database", async () => {
             const id = await getNonExistingThemeId();
@@ -287,6 +295,9 @@ describe("DELETE /api/theme", () => {
     });
 
     describe("delete a theme", () => {
+        beforeEach(async () => {
+            await knex.seed.run();
+        });
 
         it("the number of themes should decrease by one on successful delete", async () => {
             const allThemes = await getAllThemes();
@@ -306,6 +317,5 @@ describe("DELETE /api/theme", () => {
             expect(deleteResponse.status).toEqual(204);
             expect(getResponse.status).toEqual(404);
         });
-
     });
 });
