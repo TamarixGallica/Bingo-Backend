@@ -7,6 +7,7 @@ import { validate, ValidationError } from "express-validation";
 // Route handlers
 import squareRouter from "./routes/squareRouter";
 import themeRouter from "./routes/themeRouter";
+import cardRouter from "./routes/cardRouter";
 
 // Request validators
 import { themeAddValidator, squareIdValidator, squareQueryValidator, squareUpdateValidator, themeIdValidator, themeQueryValidator, squareAddValidator, themeUpdateValidator } from "./validators";
@@ -26,6 +27,7 @@ app.use(
 );
 
 // Routes
+app.get("/api/card", cardRouter.getCards);
 app.get("/api/square", validate(squareQueryValidator), squareRouter.getSquares);
 app.post("/api/square", validate(squareAddValidator), squareRouter.addSquare);
 app.get("/api/square/:id", validate(squareIdValidator), squareRouter.getSquareById);

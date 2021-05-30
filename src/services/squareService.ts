@@ -6,6 +6,7 @@ import themeService from "./themeService";
 
 export interface SquareQueryParams {
     text?: string;
+    count?: number;
 }
 
 export interface AddSquare {
@@ -37,12 +38,17 @@ const getQueryTemplate = () => {
     return query;
 };
 
-
 export const getSquares = async (queryParams: SquareQueryParams): Promise<Square[]> => {
     const query = getQueryTemplate();
 
     if (queryParams.text) {
         query.where("text", "ilike", `%${queryParams.text}%`);
+    }
+
+    if (queryParams.count)
+    {
+        const squareIds = await knex.select("id").from(squareTableName).limit(queryParams.count);
+        query.whereIn("squares.id", squareIds.map(x => x.id));
     }
     
     const squareRows = await query;
