@@ -11,6 +11,7 @@ import cardRouter from "./routes/cardRouter";
 
 // Request validators
 import { themeAddValidator, squareIdValidator, squareQueryValidator, squareUpdateValidator, themeIdValidator, themeQueryValidator, squareAddValidator, themeUpdateValidator } from "./validators";
+import { cardValidator } from "./validators/cardValidator";
 
 // Create Express server
 const app = express();
@@ -27,7 +28,7 @@ app.use(
 );
 
 // Routes
-app.get("/api/card", cardRouter.getCards);
+app.get("/api/card", validate(cardValidator), cardRouter.getCards);
 app.get("/api/square", validate(squareQueryValidator), squareRouter.getSquares);
 app.post("/api/square", validate(squareAddValidator), squareRouter.addSquare);
 app.get("/api/square/:id", validate(squareIdValidator), squareRouter.getSquareById);

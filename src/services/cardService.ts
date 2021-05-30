@@ -4,17 +4,29 @@ import { Square } from "../models";
 import squareService, { SquareQueryParams } from "./squareService";
 
 export interface CardQueryParams {
-    height: number;
-    width: number;
+    rows: number;
+    columns: number;
 }
 
-export const getCards = async (queryParams: CardQueryParams): Promise<Square[]> => {
+export const getCard = async (queryParams: CardQueryParams): Promise<Square[][]> => {
+    const { rows, columns } = queryParams;
     const squareQueryParams: SquareQueryParams = {
-        count: queryParams.height * queryParams.width,
+        count: rows * columns,
     };
 
     const squares = await squareService.getSquares(squareQueryParams);
-    return squares;
+
+    const card = new Array<Array<Square>>();
+
+    for(let i = 0; i < rows; i++) {
+        const squareRow: Square[] = [];
+        for(let j = 0; j < columns; j++) {
+            squareRow.push(squares.pop());
+        }
+        card.push(squareRow);
+    }
+
+    return card;
 };
 
-export default { getCards };
+export default { getCard };

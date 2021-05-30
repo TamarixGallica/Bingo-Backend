@@ -5,11 +5,14 @@ import cardService, { CardQueryParams } from "../services/cardService";
 
 export const getCards = async (req: Request, res: Response): Promise<void> => {
     const queryParams: CardQueryParams = {
-        height: 5,
-        width: 5,
+        rows: req.query.rows as unknown as number,
+        columns: req.query.columns as unknown as number
     };
-    const squares = await cardService.getCards(queryParams);
-    return res.status(200).json(squares).end();
+    const card = await cardService.getCard(queryParams);
+    const response = {
+        card
+    };
+    return res.status(200).json(response).end();
 };
 
 export default { getCards };
