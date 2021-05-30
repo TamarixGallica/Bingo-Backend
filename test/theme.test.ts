@@ -72,20 +72,17 @@ describe("GET /api/theme", () => {
         });
 
         it("should return expected number of results with a single word", async () => {
-            const response = await request(app).get(themeApi).query({name: "the"});
-            const returnedThemes: Theme[] = response.body;
-            expect(response.status).toEqual(200);
-            expect(returnedThemes.length).toEqual(1);
+            const verifyNumberOfResult = async (name: string) => {
+                const matchingThemes = themeEntries.filter(t => t.name.toLowerCase().includes(name));
+                const response = await request(app).get(themeApi).query({name});
+                const returnedThemes: Theme[] = response.body;
+                expect(response.status).toEqual(200);
+                expect(returnedThemes.length).toEqual(matchingThemes.length);
+            };
 
-            const response2 = await request(app).get(themeApi).query({name: "contains"});
-            const returnedThemes2: Theme[] = response2.body;
-            expect(response2.status).toEqual(200);
-            expect(returnedThemes2.length).toEqual(1);
-
-            const response3 = await request(app).get(themeApi).query({name: "m"});
-            const returnedThemes3: Theme[] = response3.body;
-            expect(response3.status).toEqual(200);
-            expect(returnedThemes3.length).toEqual(2);
+            await verifyNumberOfResult("the");
+            await verifyNumberOfResult("90");
+            await verifyNumberOfResult("m");
         });
     });
 

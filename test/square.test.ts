@@ -106,20 +106,17 @@ describe("GET /api/square", () => {
         });
 
         it("should return expected number of results with a single word", async () => {
-            const response = await request(app).get(squareApi).query({text: "the"});
-            const returnedSquares: Square[] = response.body;
-            expect(response.status).toEqual(200);
-            expect(returnedSquares.length).toEqual(3);
+            const verifyNumberOfResult = async (text: string) => {
+                const matchingSquares = squareEntries.filter(s => s.text.toLowerCase().includes(text));
+                const response = await request(app).get(squareApi).query({text});
+                const returnedSquares: Square[] = response.body;
+                expect(response.status).toEqual(200);
+                expect(returnedSquares.length).toEqual(matchingSquares.length);
+            };
 
-            const response2 = await request(app).get(squareApi).query({text: "lose"});
-            const returnedSquares2: Square[] = response2.body;
-            expect(response2.status).toEqual(200);
-            expect(returnedSquares2.length).toEqual(1);
-
-            const response3 = await request(app).get(squareApi).query({text: "on"});
-            const returnedSquares3: Square[] = response3.body;
-            expect(response3.status).toEqual(200);
-            expect(returnedSquares3.length).toEqual(2);
+            await verifyNumberOfResult("the");
+            await verifyNumberOfResult("lose");
+            await verifyNumberOfResult("on");
         });
     });
 
@@ -261,7 +258,7 @@ describe("POST /api/square", () => {
             const receivedSquare: Square = response.body;
             expect(Number.isInteger(receivedSquare.id)).toEqual(true);
             expect(receivedSquare.text).toEqual(text);
-            expect(receivedSquare.themes).toEqual(allThemes.filter(t => themeIds.includes(t.id)));
+            expect(receivedSquare.themes.sort(t => t.id)).toEqual(allThemes.filter(t => themeIds.includes(t.id)).sort(t => t.id));
         });
     });
 });
@@ -340,7 +337,7 @@ describe("PUT /api/square", () => {
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(id);
-            expect(receivedSquare.themes.map(x => x.id)).toEqual(newThemeIds);
+            expect(receivedSquare.themes.sort().map(x => x.id)).toEqual(newThemeIds.sort());
         });
 
         it("should remove themes for square in database", async () => {
@@ -363,7 +360,7 @@ describe("PUT /api/square", () => {
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(id);
-            expect(receivedSquare.themes.map(x => x.id)).toEqual(newThemeIds);
+            expect(receivedSquare.themes.sort().map(x => x.id)).toEqual(newThemeIds.sort());
         });
 
         it("should update text and themes for square in database", async () => {
