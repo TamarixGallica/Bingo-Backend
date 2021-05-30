@@ -222,15 +222,15 @@ describe("PUT /api/theme", () => {
         });
 
         it("should return 400 Bad Request when parameter id and body id don't match", async () => {
-            const id1 = themeEntries[0].id;
-            const id2 = themeEntries[1].id;
+            const id1 = 1;
+            const id2 = 2;
             const response = await request(app).put(`${themeApi}/${id1}`).send({ id: id2, text: "foo" });
             expect(response.status).toEqual(400);
         });
 
         it("should return 400 Bad Request when name is missing", async () => {
             const theme: Omit<Theme, "name"> = {
-                id: themeEntries[0].id
+                id: (await getAllThemes())[0].id
             };
             const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
             expect(response.status).toEqual(400);
@@ -238,7 +238,7 @@ describe("PUT /api/theme", () => {
 
         it("should return 400 Bad Request when name is longer than allowed", async () => {
             const theme: Theme = {
-                id: themeEntries[0].id,
+                id: (await getAllThemes())[2].id,
                 name: getTooLongText()
             };
             const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
@@ -249,7 +249,8 @@ describe("PUT /api/theme", () => {
     describe("update theme by id", () => {
 
         it("should update name for theme in database", async () => {
-            const theme = themeEntries[1];
+            const allThemes = await getAllThemes();
+            const theme = allThemes[1];
             const newName = "Theme 2.0";
             const response = await request(app).put(`${themeApi}/${theme.id}`).send({ id: theme.id, name:  newName});
             expect(response.status).toEqual(200);
@@ -281,7 +282,8 @@ describe("DELETE /api/theme", () => {
         });
 
         it("should return 204 No Content on successful delete", async () => {
-            const id = themeEntries[2].id;
+            const allThemes = await getAllThemes();
+            const id = allThemes[2].id;
             const response = await request(app).delete(`${themeApi}/${id}`);
             expect(response.status).toEqual(204);
         });
@@ -290,7 +292,8 @@ describe("DELETE /api/theme", () => {
     describe("delete a theme", () => {
 
         it("the number of themes should decrease by one on successful delete", async () => {
-            const id = themeEntries[2].id;
+            const allThemes = await getAllThemes();
+            const id = allThemes[2].id;
             const originalGetResponse = await request(app).get(themeApi);
             const deleteResponse = await request(app).delete(`${themeApi}/${id}`);
             const newGetResponse = await request(app).get(themeApi);
@@ -299,7 +302,8 @@ describe("DELETE /api/theme", () => {
         });
 
         it("deleted theme should not be found by id after successful delete", async () => {
-            const id = themeEntries[2].id;
+            const allThemes = await getAllThemes();
+            const id = allThemes[2].id;
             const deleteResponse = await request(app).delete(`${themeApi}/${id}`);
             const getResponse = await request(app).get(`${themeApi}/${id}`);
             expect(deleteResponse.status).toEqual(204);

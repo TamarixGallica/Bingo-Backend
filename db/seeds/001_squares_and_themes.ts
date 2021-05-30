@@ -7,18 +7,52 @@ const squareTable = "squares";
 const themeTable = "themes";
 const squaresThemesTable = "squares_themes";
 
-export const themeEntries: Theme[] = [
-    { id: 1, name: "Contains 'the'" },
-    { id: 2, name: "Refers to numbers" },
-    { id: 4, name: "Improved" }
+type ThemeWithoutId = Omit<Theme, "id">;
+
+type SquareWithoutId = Omit<Square, "id" | "themes"> & {
+    themes: ThemeWithoutId[]
+};
+
+export const themeEntries: ThemeWithoutId[] = [
+    { name: "Contains 'the'" },
+    { name: "Refers to numbers" },
+    { name: "Improved" }
 ];
 
-export const squareEntries: Square[] = [
-    { id: 1, text: "The first one", themes: [themeEntries[0], themeEntries[1]] },
-    { id: 2, text: "The improved edition", themes: [themeEntries[0], themeEntries[2]] },
-    { id: 3, text: "About to lose count", themes: [] },
-    { id: 27, text: "The number 27", themes: [themeEntries[0], themeEntries[1]] }
+export const squareEntries: SquareWithoutId[] = [
+    { text: "The first one", themes: [themeEntries[0], themeEntries[1]] },
+    { text: "The improved edition", themes: [themeEntries[0], themeEntries[2]] },
+    { text: "About to lose count", themes: [] },
+    { text: "The number 27", themes: [themeEntries[0], themeEntries[1]] }
 ];
+
+const addThemes = async (knex: Knex, themes: ThemeWithoutId[]): Promise<Theme[]> => {
+    const addedThemes = await Promise.all(themes.map(async (theme) => {
+        const insertedIds = await knex(themeTable).insert(theme).returning("id");
+        return { id: insertedIds[0], ...theme };
+    }));
+
+    return addedThemes;
+};
+
+const addSquares = async (knex: Knex, squares: SquareWithoutId[], addedThemes: Theme[]): Promise<Square[]> => {
+    const addedSquares = await Promise.all(squares.map(async (square) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { themes, ...squareProperties } = square;
+        const insertedIds = await knex(squareTable).insert(squareProperties).returning("id");
+        const insertedId = insertedIds[0];
+
+        const updatedThemes = await Promise.all(square.themes.map(async (squareTheme) => {
+            const themeId = addedThemes.find(t => t.name == squareTheme.name).id;
+            await knex(squaresThemesTable).insert({ square_id: insertedId, theme_id: themeId });
+            return { id: themeId, ...squareTheme };
+        }));
+
+        return { id: insertedIds[0], themes: updatedThemes, ...squareProperties };
+    }));
+
+    return addedSquares;
+};
 
 export async function seed(knex: Knex): Promise<void> {
     dotenv.config();
@@ -28,23 +62,7 @@ export async function seed(knex: Knex): Promise<void> {
     await knex(squareTable).del();
     await knex(themeTable).del();
 
-    // Inserts seed entries
-    await knex(themeTable).insert(themeEntries);
+    const addedThemes = await addThemes(knex, themeEntries);
 
-    const squaresToAdd: Omit<Square, "themes">[] = squareEntries.map((square) => { return { id: square.id, text: square.text }; });
-    await knex(squareTable).insert(squaresToAdd);
-
-    const squaresThemesLinksToAdd = [];
-    squareEntries.forEach((square) => {
-        square.themes.forEach((theme) => {
-            squaresThemesLinksToAdd.push({ square_id: square.id, theme_id: theme.id});
-        });
-    });
-
-    await knex(squaresThemesTable).insert(squaresThemesLinksToAdd);
-
-    // Update auto increment counters manually because ids were specified on insert
-    await knex.raw("select setval('squares_id_seq', max(id)) from squares");
-    await knex.raw("select setval('themes_id_seq', max(id)) from themes");
-    await knex.raw("select setval('squares_themes_id_seq', max(id)) from squares_themes");
+    await addSquares(knex, squareEntries, addedThemes);
 }

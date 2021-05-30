@@ -2,7 +2,7 @@ import request from "supertest";
 import app from "../src/app";
 import knex from "../src/services/knexService";
 import { Square, Theme } from "../src/models";
-import { squareEntries, themeEntries } from "../db/seeds/001_squares_and_themes";
+import { squareEntries } from "../db/seeds/001_squares_and_themes";
 import { getAllThemes, getNonExistingThemeId, getTooLongText } from "./shared";
 
 const squareApi = "/api/square";
@@ -241,24 +241,27 @@ describe("POST /api/square", () => {
 
         it("should add a square with a single theme id", async () => {
             const text = "tinstafl";
-            const themeIds = (await getExistingThemeIds()).slice(-1, 1);
+            const themes = (await getAllThemes()).slice(-1, 1);
+            const themeIds = themes.map(t => t.id);
             const response = await request(app).post(squareApi).send({ text, themeId: themeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(Number.isInteger(receivedSquare.id)).toEqual(true);
             expect(receivedSquare.text).toEqual(text);
-            expect(receivedSquare.themes).toEqual(themeEntries.filter(t => themeIds.includes(t.id)));
+            expect(receivedSquare.themes).toEqual(themes);
         });
 
         it("should add a square with multiple theme ids", async () => {
             const text = "tinstafl";
-            const themeIds = (await getExistingThemeIds()).slice(0, 2);
+            const allThemes = await getAllThemes();
+            const allThemeIds = allThemes.map(t => t.id);
+            const themeIds = allThemeIds.slice(0, 2);
             const response = await request(app).post(squareApi).send({ text, themeId: themeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(Number.isInteger(receivedSquare.id)).toEqual(true);
             expect(receivedSquare.text).toEqual(text);
-            expect(receivedSquare.themes).toEqual(themeEntries.filter(t => themeIds.includes(t.id)));
+            expect(receivedSquare.themes).toEqual(allThemes.filter(t => themeIds.includes(t.id)));
         });
     });
 });
