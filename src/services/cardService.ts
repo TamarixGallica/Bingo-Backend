@@ -8,13 +8,31 @@ export interface CardQueryParams {
     columns: number;
 }
 
-export const getCard = async (queryParams: CardQueryParams): Promise<Square[][]> => {
+export enum CardResponseStatus {
+    Success_OK,
+    Error_TooFewCards
+}
+
+export interface CardQueryResponse {
+    status: CardResponseStatus;
+    card?: Square[][];
+}
+
+export const getCard = async (queryParams: CardQueryParams): Promise<CardQueryResponse> => {
     const { rows, columns } = queryParams;
+    const count = rows * columns;
     const squareQueryParams: SquareQueryParams = {
-        count: rows * columns,
+        count
     };
 
     const squares = await squareService.getSquares(squareQueryParams);
+
+    if (squares.length < count)
+    {
+        return {
+            status: CardResponseStatus.Error_TooFewCards
+        };
+    }
 
     const card = new Array<Array<Square>>();
 
@@ -26,7 +44,12 @@ export const getCard = async (queryParams: CardQueryParams): Promise<Square[][]>
         card.push(squareRow);
     }
 
-    return card;
+    const cardResponse: CardQueryResponse = {
+        status: CardResponseStatus.Success_OK,
+        card
+    };
+
+    return cardResponse;
 };
 
 export default { getCard };

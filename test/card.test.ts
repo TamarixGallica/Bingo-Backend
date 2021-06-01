@@ -81,6 +81,15 @@ describe("GET /api/card", () => {
             const response = await request(app).get(cardApi).query(queryParams);
             expect(response.status).toEqual(200);
         });
+
+        it("should return 400 Bad Request when not enough cards without a theme", async () => {
+            const queryParams = {
+                rows: 10,
+                columns: 10
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            expect(response.status).toEqual(400);
+        });
     });
 
     describe("retrieve a card with default filters", () => {
