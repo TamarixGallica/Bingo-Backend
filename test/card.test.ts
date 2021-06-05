@@ -239,6 +239,60 @@ describe("GET /api/card", () => {
                 }
             }
         });
+
+        it("should not return squares in the same order for multiple cards", async () => {
+            const returnedSquareIds = new Array<Array<number>>();
+            for (let i = 0; i < 5; i++)
+            {
+                const queryParams: QueryParams = {
+                    rows: 7,
+                    columns: 7
+                };
+                const response = await request(app).get(cardApi).query(queryParams);
+                const card: Square[][] = response.body.card;
+                const returnedIds = [];
+                card.forEach((row) => {
+                    returnedIds.push(row.map(x => x.id));
+                });
+                returnedSquareIds.push(returnedIds);
+            }
+            let allInSameOrder = true;
+            for (let i = 0; i < returnedSquareIds.length - 1; i++)
+            {
+                if (returnedSquareIds[i] !== returnedSquareIds[i + 1])
+                {
+                    allInSameOrder = false;
+                }
+            }
+            expect(allInSameOrder).toEqual(false);
+        });
+
+        it("should not return the same squares for multiple cards", async () => {
+            const returnedSquareIds = new Array<Array<number>>();
+            for (let i = 0; i < 5; i++)
+            {
+                const queryParams: QueryParams = {
+                    rows: 3,
+                    columns: 3
+                };
+                const response = await request(app).get(cardApi).query(queryParams);
+                const card: Square[][] = response.body.card;
+                const returnedIds = [];
+                card.forEach((row) => {
+                    returnedIds.push(row.map(x => x.id));
+                });
+                returnedSquareIds.push(returnedIds);
+            }
+            let allSameSquares = true;
+            for (let i = 0; i < returnedSquareIds.length - 1; i++)
+            {
+                if (returnedSquareIds[i].sort() !== returnedSquareIds[i + 1].sort())
+                {
+                    allSameSquares = false;
+                }
+            }
+            expect(allSameSquares).toEqual(false);
+        });
     });
 
     describe("retrieve a card with theme filter", () => {

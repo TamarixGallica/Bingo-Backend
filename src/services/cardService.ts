@@ -26,7 +26,8 @@ export const getCard = async (queryParams: CardQueryParams): Promise<CardQueryRe
     const count = rows * columns;
     const squareQueryParams: SquareQueryParams = {
         count,
-        themeId
+        themeId,
+        randomOrder: true
     };
 
     if (themeId)

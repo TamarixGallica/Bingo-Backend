@@ -7,6 +7,7 @@ export interface SquareQueryParams {
     text?: string;
     count?: number;
     themeId?: number[];
+    randomOrder?: boolean;
 }
 
 export interface AddSquare {
@@ -52,6 +53,11 @@ export const getSquares = async (queryParams: SquareQueryParams): Promise<Square
 
     if (queryParams.themeId) {
         squareIdQuery.whereIn("squares_themes.theme_id", queryParams.themeId);
+    }
+
+    if (queryParams.randomOrder)
+    {
+        squareIdQuery.orderByRaw("RANDOM()");
     }
 
     if (queryParams.count)
