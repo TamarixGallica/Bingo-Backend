@@ -1,6 +1,6 @@
 {
   "name": "bingo-backend",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "Backend for a Bingo game",
   "main": "index.js",
   "scripts": {

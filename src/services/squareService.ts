@@ -2,11 +2,11 @@
 
 import { Square, Theme } from "../models";
 import knex from "./knexService";
-import themeService from "./themeService";
 
 export interface SquareQueryParams {
     text?: string;
     count?: number;
+    themeId?: number[];
 }
 
 export interface AddSquare {
@@ -22,37 +22,49 @@ export interface UpdateSquare {
 
 interface SquareRow extends Square {
     theme_id?: number;
+    name?: string;
 }
 
 const squareTableName = "squares";
 const squaresThemesTableName = "squares_themes";
-const returnedProps = ["squares.id", "text", "squares_themes.theme_id"];
+const returnedProps = ["squares.id", "text", "squares_themes.theme_id", "themes.name"];
 
 const getQueryTemplate = () => {
     const query = knex.select(returnedProps)
     .from<SquareRow>(squareTableName)
     .leftJoin(squaresThemesTableName, "squares.id", "=", "squares_themes.square_id")
     .leftJoin("themes", "squares_themes.theme_id", "=", "themes.id")
-    .groupBy(["squares.id", "squares_themes.theme_id"]);
+    .groupBy(["squares.id", "squares_themes.theme_id", "themes.name"]);
   
     return query;
 };
 
 export const getSquares = async (queryParams: SquareQueryParams): Promise<Square[]> => {
-    const query = getQueryTemplate();
-
+    const squareIdQuery = knex.select("squares.id")
+        .from(squareTableName)
+        .leftJoin(squaresThemesTableName, "squares.id", "=", "squares_themes.square_id")
+        .leftJoin("themes", "squares_themes.theme_id", "=", "themes.id")
+        .groupBy(["squares.id"]);
+    
     if (queryParams.text) {
-        query.where("text", "ilike", `%${queryParams.text}%`);
+        squareIdQuery.where("text", "ilike", `%${queryParams.text}%`);
+    }
+
+    if (queryParams.themeId) {
+        squareIdQuery.whereIn("squares_themes.theme_id", queryParams.themeId);
     }
 
     if (queryParams.count)
     {
-        const squareIds = await knex.select("id").from(squareTableName).limit(queryParams.count);
-        query.whereIn("squares.id", squareIds.map(x => x.id));
+        squareIdQuery.limit(queryParams.count);
     }
+
+    const squareIds = await squareIdQuery;
     
+    const query = getQueryTemplate();
+    query.whereIn("squares.id", squareIds.map(x => x.id));
     const squareRows = await query;
-    const squares = await GetSquaresWithThemes(squareRows);
+    const squares = await AssignThemesToSquares(squareRows);
     return squares;
 };
 
@@ -63,7 +75,7 @@ export const getSquareById = async (id: number): Promise<Square|undefined> => {
     {
         return undefined;
     }
-    const squares = await GetSquaresWithThemes(squareRows);
+    const squares = await AssignThemesToSquares(squareRows);
     return squares[0];
 };
 
@@ -101,12 +113,11 @@ export const deleteSquareById = async (id: number): Promise<boolean> => {
     return deletedRows === 1;
 };
 
-const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> => {
+const AssignThemesToSquares = async (squareRows: SquareRow[]): Promise<Square[]> => {
     const squares: Square[] = [];
-    const themes: Theme[] = await themeService.getThemes({name: null});
 
     squareRows.forEach((row) => {
-        const {theme_id, ...rest} = row;
+        const {theme_id, name, ...rest} = row;
 
         if (!squares.find((square) => square.id === row.id))
         {
@@ -117,7 +128,10 @@ const GetSquaresWithThemes = async (squareRows: SquareRow[]): Promise<Square[]> 
 
         if (theme_id)
         {
-            const theme = themes.find((theme) => theme.id === theme_id);
+            const theme: Theme = {
+                id: theme_id,
+                name
+            };
             square.themes.push(theme);
         }
     });

@@ -2,9 +2,16 @@ import request from "supertest";
 import app from "../src/app";
 import knex from "../src/services/knexService";
 import { Square } from "../src/models";
-import { squareEntries } from "../db/seeds/001_squares_and_themes";
+import { squareEntries, theme1940sMovies, theme1950sMovies, theme1970sMovies, theme1980sMovies, theme1990sMovies, theme2000sMovies, theme2010sMovies, themeTop50MoviesOfAllTime } from "../db/seeds/001_squares_and_themes";
+import { getAllThemes, getNonExistingThemeId } from "./shared";
 
 const cardApi = "/api/card";
+
+interface QueryParams {
+    rows: number;
+    columns: number;
+    themeId?: number | Array<number>
+}
 
 beforeAll(async () => {
     await knex.migrate.rollback(null, true);
@@ -24,7 +31,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return 400 Bad Request when number of rows is negative", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: -10,
                 columns: 4,
             };
@@ -33,7 +40,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return 400 Bad Request when number of rows is lower than minimum", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 1,
                 columns: 4,
             };
@@ -51,7 +58,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return 400 Bad Request when number of columns is negative", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 4,
                 columns: -10
             };
@@ -60,7 +67,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return 400 Bad Request when number of columns is lower than minimum", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 4,
                 columns: 1
             };
@@ -74,7 +81,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return 200 OK when number of rows and columns are valid", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 3,
                 columns: 4
             };
@@ -83,18 +90,65 @@ describe("GET /api/card", () => {
         });
 
         it("should return 400 Bad Request when not enough cards without a theme", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 10,
                 columns: 10
             };
             const response = await request(app).get(cardApi).query(queryParams);
             expect(response.status).toEqual(400);
         });
+
+        it("should return 400 Bad Request when not enough cards with the requested theme", async () => {
+            const themes = await getAllThemes();
+            const themeId = themes.find(x => x.name === theme1950sMovies.name).id;
+            const queryParams: QueryParams = {
+                rows: 3,
+                columns: 3,
+                themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 400 Bad Request when requesting a card with non-existing theme", async () => {
+            const themeId = await getNonExistingThemeId();
+            const queryParams: QueryParams = {
+                rows: 4,
+                columns: 4,
+                themeId: themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            expect(response.status).toEqual(400);
+        });
+
+        it("should return 200 OK when requesting a card with one existing theme", async () => {
+            const themes = await getAllThemes();
+            const themeId = themes.find(x => x.name === themeTop50MoviesOfAllTime.name).id;
+            const queryParams: QueryParams = {
+                rows: 4,
+                columns: 4,
+                themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            expect(response.status).toEqual(200);
+        });
+
+        it("should return 200 OK when requesting a card with multiple existing themes", async () => {
+            const themes = await getAllThemes();
+            const themeId = themes.filter(x => x.name === theme2000sMovies.name || x.name === theme2010sMovies.name).map(x => x.id);
+            const queryParams: QueryParams = {
+                rows: 4,
+                columns: 4,
+                themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            expect(response.status).toEqual(200);
+        });
     });
 
     describe("retrieve a card with default filters", () => {
         it("should return 200 OK", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 5,
                 columns: 5
             };
@@ -103,7 +157,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return application/json as content type", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 5,
                 columns: 5
             };
@@ -112,7 +166,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return an array", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 5,
                 columns: 5
             };
@@ -121,7 +175,7 @@ describe("GET /api/card", () => {
         });
 
         it("returned card should contain expected number of rows", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 4,
                 columns: 5
             };
@@ -131,7 +185,7 @@ describe("GET /api/card", () => {
         });
 
         it("all rows of returned card should contain expected number of columns", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 4,
                 columns: 5
             };
@@ -145,7 +199,7 @@ describe("GET /api/card", () => {
         });
 
         it("should return id with all squares", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 5,
                 columns: 5
             };
@@ -162,7 +216,7 @@ describe("GET /api/card", () => {
         });
 
         it("all returned squares should have expected themes", async () => {
-            const queryParams = {
+            const queryParams: QueryParams = {
                 rows: 4,
                 columns: 5
             };
@@ -184,6 +238,70 @@ describe("GET /api/card", () => {
                     });
                 }
             }
+        });
+    });
+
+    describe("retrieve a card with theme filter", () => {
+        it("should return application/json as content type", async () => {
+            const themes = await getAllThemes();
+            const themeId = themes.find(x => x.name === theme1990sMovies.name).id;
+            const queryParams: QueryParams = {
+                rows: 4,
+                columns: 4,
+                themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            expect(response.type).toEqual("application/json");
+        });
+
+        it("should return an array", async () => {
+            const themes = await getAllThemes();
+            const themeId = themes.find(x => x.name === theme1990sMovies.name).id;
+            const queryParams: QueryParams = {
+                rows: 4,
+                columns: 4,
+                themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            expect(Array.isArray(response.body.card)).toEqual(true);
+        });
+
+        it("each square should contain the requested theme", async () => {
+            const themes = await getAllThemes();
+            const themeId = themes.find(x => x.name === theme1990sMovies.name).id;
+            const queryParams: QueryParams = {
+                rows: 4,
+                columns: 4,
+                themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            const card: Square[][] = response.body.card;
+            card.forEach((squareRow) => {
+                squareRow.forEach((square) => {
+                    expect(square.themes.map(x => x.id).includes(themeId)).toEqual(true);
+                });
+            });
+        });
+
+        it("each square should contain one of the requested themes", async () => {
+            const themes = await getAllThemes();
+            const themeId = themes.filter(x =>
+                x.name === theme1980sMovies.name ||
+                x.name === theme1970sMovies.name ||
+                x.name === theme1940sMovies.name
+                ).map(x => x.id);
+            const queryParams: QueryParams = {
+                rows: 3,
+                columns: 3,
+                themeId
+            };
+            const response = await request(app).get(cardApi).query(queryParams);
+            const card: Square[][] = response.body.card;
+            card.forEach((squareRow) => {
+                squareRow.forEach((square) => {
+                    expect(square.themes.filter(x => themeId.includes(x.id)).length).toEqual(1);
+                });
+            });
         });
     });
 });

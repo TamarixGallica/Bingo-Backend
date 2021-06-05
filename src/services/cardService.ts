@@ -2,15 +2,18 @@
 
 import { Square } from "../models";
 import squareService, { SquareQueryParams } from "./squareService";
+import themeService from "./themeService";
 
 export interface CardQueryParams {
     rows: number;
     columns: number;
+    themeId?: number[];
 }
 
 export enum CardResponseStatus {
     Success_OK,
-    Error_TooFewCards
+    Error_TooFewCards,
+    Error_ThemeNotFound,
 }
 
 export interface CardQueryResponse {
@@ -19,11 +22,23 @@ export interface CardQueryResponse {
 }
 
 export const getCard = async (queryParams: CardQueryParams): Promise<CardQueryResponse> => {
-    const { rows, columns } = queryParams;
+    const { rows, columns, themeId } = queryParams;
     const count = rows * columns;
     const squareQueryParams: SquareQueryParams = {
-        count
+        count,
+        themeId
     };
+
+    if (themeId)
+    {
+        const foundThemes = await themeService.getThemesById(themeId);
+        if (foundThemes.length < themeId.length)
+        {
+            return {
+                status: CardResponseStatus.Error_ThemeNotFound
+            };
+        }
+    }
 
     const squares = await squareService.getSquares(squareQueryParams);
 

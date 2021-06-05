@@ -7,14 +7,14 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
 - [ ] API should expose an endpoint for getting bingo cards
   - A card consists of a number of rows and columns specified in the request
   - Endpoint should support the following parameters
-    - [ ] Number of columns (optional, defaults to 5)
-    - [ ] Number of rows (optional, defaults to 5)
-    - [ ] Any number of theme identifiers (optional)
+    - [X] Number of columns (optional, defaults to 5)
+    - [X] Number of rows (optional, defaults to 5)
+    - [X] Any number of theme identifiers (optional)
   - If any theme identifiers aren't defined, squares with any themes or without themes should be returned
   - No duplicate squares should be returned
   - If enough squares aren't available for the requested parameters, 404 Not Found should be returned
   - The order of squares should be randomized
-- [ ] API should expose an endpoint for reading, creating, updating and deleting 
+- [X] API should expose an endpoint for reading, creating, updating and deleting 
   - [X] Bingo squares
     - [X] Read
       - [X] By identifier

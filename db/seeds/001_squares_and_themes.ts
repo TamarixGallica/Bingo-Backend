@@ -13,17 +13,17 @@ type SquareWithoutId = Omit<Square, "id" | "themes"> & {
     themes: ThemeWithoutId[]
 };
 
-const themeTop50MoviesOfAllTime: ThemeWithoutId = { name: "IMDB top 50 movies of all time "};
-const theme1930sMovies : ThemeWithoutId = { name: "30's movies" };
-const theme1940sMovies : ThemeWithoutId = { name: "40's movies" };
-const theme1950sMovies : ThemeWithoutId = { name: "50's movies" };
-const theme1960sMovies : ThemeWithoutId = { name: "60's movies" };
-const theme1970sMovies : ThemeWithoutId = { name: "70's movies" };
-const theme1980sMovies : ThemeWithoutId = { name: "80's movies" };
-const theme1990sMovies : ThemeWithoutId = { name: "90's movies" };
-const theme2000sMovies : ThemeWithoutId = { name: "2000's movies" };
-const theme2010sMovies : ThemeWithoutId = { name: "2010's movies" };
-const theme2020sMovies : ThemeWithoutId = { name: "2020's movies" };
+export const themeTop50MoviesOfAllTime: ThemeWithoutId = { name: "IMDB top 50 movies of all time "};
+export const theme1930sMovies : ThemeWithoutId = { name: "30's movies" };
+export const theme1940sMovies : ThemeWithoutId = { name: "40's movies" };
+export const theme1950sMovies : ThemeWithoutId = { name: "50's movies" };
+export const theme1960sMovies : ThemeWithoutId = { name: "60's movies" };
+export const theme1970sMovies : ThemeWithoutId = { name: "70's movies" };
+export const theme1980sMovies : ThemeWithoutId = { name: "80's movies" };
+export const theme1990sMovies : ThemeWithoutId = { name: "90's movies" };
+export const theme2000sMovies : ThemeWithoutId = { name: "2000's movies" };
+export const theme2010sMovies : ThemeWithoutId = { name: "2010's movies" };
+export const theme2020sMovies : ThemeWithoutId = { name: "2020's movies" };
 
 export const themeEntries: ThemeWithoutId[] = [
     themeTop50MoviesOfAllTime,
