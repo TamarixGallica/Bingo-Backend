@@ -1,13 +1,17 @@
 "use strict";
 
+interface Password {
+    password: string;
+}
+
 export interface UserBase {
     username: string;
     name: string;
 }
 
-export interface RegisterUser extends UserBase {
-    password: string;
-}
+export type LoginUser = Omit<UserBase, "name"> & Password;
+
+export type RegisterUser = UserBase & Password;
 
 export interface User extends UserBase {
     id: number;

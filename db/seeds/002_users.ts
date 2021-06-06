@@ -25,8 +25,9 @@ export const userEntries: NewUser[] = [
 
 const addUsers = async (knex: Knex, users: NewUser[]): Promise<void> => {
     await Promise.all(users.map(async (user) => {
-        delete user.password;
-        await knex(userTable).insert(user);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...userWithoutPassword} = user;
+        await knex(userTable).insert(userWithoutPassword);
     }));
 };
 

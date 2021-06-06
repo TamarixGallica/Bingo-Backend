@@ -12,7 +12,7 @@ import userRouter from "./routes/userRouter";
 // Request validators
 import { themeAddValidator, squareIdValidator, squareQueryValidator, squareUpdateValidator, themeIdValidator, themeQueryValidator, squareAddValidator, themeUpdateValidator } from "./validators";
 import { cardValidator } from "./validators/cardValidator";
-import { registerUserValidator } from "./validators/userValidator";
+import { loginUserValidator, registerUserValidator } from "./validators/userValidator";
 
 // Create Express server
 const app = express();
@@ -40,6 +40,7 @@ app.post("/api/theme", validate(themeAddValidator), themeRouter.addTheme);
 app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);
 app.put("/api/theme/:id", validate(themeUpdateValidator, { context: true }), themeRouter.updateTheme);
 app.delete("/api/theme/:id", validate(themeIdValidator), themeRouter.deleteThemeById);
+app.post("/api/user/login", validate(loginUserValidator), userRouter.loginUser);
 app.post("/api/user/register", validate(registerUserValidator), userRouter.registerUser);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,17 +1,23 @@
 "use strict";
 
 import bcrypt from "bcrypt";
-import { RegisterUser, User } from "../models";
+import { LoginUser, RegisterUser, User } from "../models";
 import knex from "../config/database";
 
 export enum UserResponseStatus {
     Success_OK,
     Error_UsernameAlreadyTaken,
+    Error_UserNotFound,
+    Error_PasswordIncorrect,
 }
 
 export interface AddUserResponse {
     status: UserResponseStatus;
     user?: User;
+}
+
+export interface LoginUserResponse {
+    status: UserResponseStatus;
 }
 
 const userTableName = "users";
@@ -22,19 +28,19 @@ const hashPassword = async (password: string): Promise<string> => {
     return hash;
 };
 
+const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
+    const result = await bcrypt.compare(password, hash);
+    return result;
+};
+
 export const getUserByUsername = async (username: string): Promise<User | undefined> => 
 {
-    const query = knex.select(returnedProps)
+    const query = knex.first(returnedProps)
         .from<User>(userTableName)
         .where("username", username);
 
-    const users = await query;
-
-    if (users.length === 0)
-    {
-        return undefined;
-    }
-    return users[0];
+    const user = await query;
+    return user;
 };
 
 export const addUser = async (user: RegisterUser): Promise<AddUserResponse> => {
@@ -62,4 +68,28 @@ export const addUser = async (user: RegisterUser): Promise<AddUserResponse> => {
     };
 };
 
-export default { getUserByUsername, addUser };
+export const loginUser = async (user: LoginUser): Promise<LoginUserResponse> => {
+    const userInDb = await getUserByUsername(user.username);
+
+    if (!userInDb)
+    {
+        return {
+            status: UserResponseStatus.Error_UserNotFound
+        };
+    }
+
+    const passwordMatches = await verifyPassword(user.password, userInDb.hash);
+
+    if (!passwordMatches)
+    {
+        return {
+            status: UserResponseStatus.Error_PasswordIncorrect
+        };
+    }
+
+    return {
+        status: UserResponseStatus.Success_OK
+    };
+};
+
+export default { getUserByUsername, addUser, loginUser };

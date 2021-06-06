@@ -7,3 +7,10 @@ export const registerUserValidator: schema = {
         password: Joi.string().min(8).required(),
     })
 };
+
+export const loginUserValidator: schema = {
+    body: Joi.object({
+        username: Joi.string().min(1).max(255).token().required(),
+        password: Joi.string().min(8).required(),
+    })
+};
