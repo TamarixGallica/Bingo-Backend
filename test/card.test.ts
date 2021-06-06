@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../src/app";
-import knex from "../src/services/knexService";
+import knex from "../src/config/database";
 import { Square } from "../src/models";
 import { squareEntries, theme1940sMovies, theme1950sMovies, theme1970sMovies, theme1980sMovies, theme1990sMovies, theme2000sMovies, theme2010sMovies, themeTop50MoviesOfAllTime } from "../db/seeds/001_squares_and_themes";
 import { getAllThemes, getNonExistingThemeId } from "./shared";

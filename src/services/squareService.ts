@@ -1,7 +1,7 @@
 "use strict";
 
 import { Square, Theme } from "../models";
-import knex from "./knexService";
+import knex from "../config/database";
 
 export interface SquareQueryParams {
     text?: string;

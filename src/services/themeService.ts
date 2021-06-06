@@ -1,7 +1,7 @@
 "use strict";
 
 import { Theme } from "../models";
-import knex from "./knexService";
+import knex from "../config/database";
 
 export interface ThemeQueryParams {
     name?: string;

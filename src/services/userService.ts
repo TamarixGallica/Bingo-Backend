@@ -2,7 +2,7 @@
 
 import bcrypt from "bcrypt";
 import { RegisterUser, User } from "../models";
-import knex from "./knexService";
+import knex from "../config/database";
 
 export enum UserResponseStatus {
     Success_OK,

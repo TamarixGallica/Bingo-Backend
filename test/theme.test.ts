@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../src/app";
-import knex from "../src/services/knexService";
+import knex from "../src/config/database";
 import { Theme } from "../src/models";
 import { themeEntries } from "../db/seeds/001_squares_and_themes";
 import { getAllThemes, getNonExistingThemeId, getTooLongText, themeApi } from "./shared";

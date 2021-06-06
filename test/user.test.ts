@@ -1,7 +1,7 @@
 import request from "supertest";
 import { userEntries } from "../db/seeds/002_users";
 import app from "../src/app";
-import knex from "../src/services/knexService";
+import knex from "../src/config/database";
 import { getTooLongText } from "./shared";
 
 const userApi = "/api/user";
