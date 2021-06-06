@@ -1,8 +1,10 @@
 "use strict";
 
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { LoginUser, RegisterUser, User } from "../models";
 import knex from "../config/database";
+import sessionService from "./sessionService";
 
 export enum UserResponseStatus {
     Success_OK,
@@ -18,6 +20,7 @@ export interface AddUserResponse {
 
 export interface LoginUserResponse {
     status: UserResponseStatus;
+    token?: string;
 }
 
 const userTableName = "users";
@@ -31,6 +34,12 @@ const hashPassword = async (password: string): Promise<string> => {
 const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
     const result = await bcrypt.compare(password, hash);
     return result;
+};
+
+const generateToken = async (): Promise<string> => {
+    const buffer = await crypto.randomBytes(16);
+    const token = buffer.toString("hex");
+    return token;
 };
 
 export const getUserByUsername = async (username: string): Promise<User | undefined> => 
@@ -87,8 +96,13 @@ export const loginUser = async (user: LoginUser): Promise<LoginUserResponse> => 
         };
     }
 
+    const token = await generateToken();
+
+    await sessionService.addSession({ userId: userInDb.id, token });
+
     return {
-        status: UserResponseStatus.Success_OK
+        status: UserResponseStatus.Success_OK,
+        token
     };
 };
 

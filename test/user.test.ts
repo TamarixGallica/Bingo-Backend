@@ -207,4 +207,28 @@ describe("POST /api/user/login", () => {
             expect(response.status).toEqual(200);
         });
     });
+
+    describe("log user in", () => {
+        it("should return a cookie", async () => {
+            const loginRequest: LoginRequest = {
+                username: userEntries[1].username,
+                password: userEntries[1].password
+            };
+            const response = await request(app).post(userApiLogin).send(loginRequest);
+            const cookie = response.header["set-cookie"];
+            expect(cookie).not.toEqual(undefined);
+        });
+
+        it("should return a cookie with a token", async () => {
+            const loginRequest: LoginRequest = {
+                username: userEntries[1].username,
+                password: userEntries[1].password
+            };
+            const response = await request(app).post(userApiLogin).send(loginRequest);
+            const cookieArray: Array<string> = response.header["set-cookie"];
+            const tokenCookie = cookieArray.find(x => x.includes("token"));
+            const tokenRegEx = /token=[0-9a-fA-F]{32}/;
+            expect(tokenRegEx.test(tokenCookie)).toEqual(true);
+        });
+    });
 });

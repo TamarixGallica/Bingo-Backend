@@ -16,6 +16,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         return res.status(401).end();
     }
 
+    res.cookie("token", loginUserResponse.token);
+
     return res.status(200).end();
 };
 
