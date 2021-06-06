@@ -1,6 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
 import compression from "compression";  // compresses requests
-import bodyParser from "body-parser";
 import path from "path";
 import { validate, ValidationError } from "express-validation";
 
@@ -8,10 +7,12 @@ import { validate, ValidationError } from "express-validation";
 import squareRouter from "./routes/squareRouter";
 import themeRouter from "./routes/themeRouter";
 import cardRouter from "./routes/cardRouter";
+import userRouter from "./routes/userRouter";
 
 // Request validators
 import { themeAddValidator, squareIdValidator, squareQueryValidator, squareUpdateValidator, themeIdValidator, themeQueryValidator, squareAddValidator, themeUpdateValidator } from "./validators";
 import { cardValidator } from "./validators/cardValidator";
+import { registerUserValidator } from "./validators/userValidator";
 
 // Create Express server
 const app = express();
@@ -20,8 +21,8 @@ const app = express();
 // Express configuration
 app.set("port", process.env.PORT || 3000);
 app.use(compression());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
     express.static(path.join(__dirname, "public"), { maxAge: 31557600000 })
@@ -39,6 +40,7 @@ app.post("/api/theme", validate(themeAddValidator), themeRouter.addTheme);
 app.get("/api/theme/:id", validate(themeIdValidator), themeRouter.getThemeById);
 app.put("/api/theme/:id", validate(themeUpdateValidator, { context: true }), themeRouter.updateTheme);
 app.delete("/api/theme/:id", validate(themeIdValidator), themeRouter.deleteThemeById);
+app.post("/api/user/register", validate(registerUserValidator), userRouter.registerUser);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
