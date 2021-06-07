@@ -4,7 +4,7 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
 
 ## Planned features
 
-- [ ] API should expose an endpoint for getting bingo cards
+- [X] API should expose an endpoint for getting bingo cards
   - A card consists of a number of rows and columns specified in the request
   - Endpoint should support the following parameters
     - [X] Number of columns (optional, defaults to 5)
@@ -12,7 +12,7 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
     - [X] Any number of theme identifiers (optional)
   - If any theme identifiers aren't defined, squares with any themes or without themes should be returned
   - No duplicate squares should be returned
-  - If enough squares aren't available for the requested parameters, 404 Not Found should be returned
+  - If enough squares aren't available for the requested parameters, 400 Bad Request should be returned
   - The order of squares should be randomized
 - [X] API should expose an endpoint for reading, creating, updating and deleting 
   - [X] Bingo squares

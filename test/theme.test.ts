@@ -3,7 +3,7 @@ import app from "../src/app";
 import knex from "../src/config/database";
 import { Theme } from "../src/models";
 import { themeEntries } from "../db/seeds/001_squares_and_themes";
-import { getAllThemes, getNonExistingThemeId, getTooLongText, themeApi } from "./shared";
+import { getAllThemes, getCookieHeader, getNonExistingThemeId, getTooLongText, themeApi } from "./shared";
 
 beforeAll(async () => {
     await knex.migrate.rollback(null, true);
@@ -153,8 +153,21 @@ describe("POST /api/theme", () => {
             expect(response.status).toEqual(400);
         });
 
+        it("should return 401 Unauthorized when not passing a token", async () => {
+            const name = "testing";
+            const response = await request(app).post(themeApi).send({ name });
+            expect(response.status).toEqual(401);
+        });
+
+        it("should return 401 Unauthorized when passing an invalid token", async () => {
+            const name = "testing";
+            const response = await request(app).post(themeApi).send({ name }).set("Cookie", ["token=aabbccddeeff00112233445566"]);
+            expect(response.status).toEqual(401);
+        });
+
         it("should return 200 when text is supplied", async () => {
-            const response = await request(app).post(themeApi).send({ name: "foo" });
+            const cookieHeader = await getCookieHeader();
+            const response = await request(app).post(themeApi).set("Cookie", cookieHeader).send({ name: "foo" });
             expect(response.status).toEqual(200);
         });
     });
@@ -165,8 +178,9 @@ describe("POST /api/theme", () => {
         });
 
             it("should add a theme with name", async () => {
+            const cookieHeader = await getCookieHeader();
             const name = "testing";
-            const response = await request(app).post(themeApi).send({ name });
+            const response = await request(app).post(themeApi).send({ name }).set("Cookie", cookieHeader);
             const theme: Theme = response.body;
             expect(response.status).toEqual(200);
             expect(Number.isInteger(theme.id)).toEqual(true);
@@ -174,9 +188,10 @@ describe("POST /api/theme", () => {
         });
 
         it("added theme should appear in the list of themes after adding", async () => {
+            const cookieHeader = await getCookieHeader();
             const name = "testing is fun";
 
-            const addResponse = await request(app).post(themeApi).send({ name });
+            const addResponse = await request(app).post(themeApi).send({ name }).set("Cookie", cookieHeader);
             const id = addResponse.body.id;
             expect(addResponse.status).toEqual(200);
 
@@ -196,9 +211,10 @@ describe("PUT /api/theme", () => {
         });
 
         it("should return 404 Not Found when updating a theme not in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const id = await getNonExistingThemeId();
             const theme: Theme = { id, name: "bar" };
-            const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
+            const response = await request(app).put(`${themeApi}/${theme.id}`).set("Cookie", cookieHeader).send(theme);
             expect(response.status).toEqual(404);
         });
 
@@ -244,6 +260,22 @@ describe("PUT /api/theme", () => {
             const response = await request(app).put(`${themeApi}/${theme.id}`).send(theme);
             expect(response.status).toEqual(400);
         });
+
+        it("should return 401 Unauthorized when not passing a token", async () => {
+            const allThemes = await getAllThemes();
+            const theme = allThemes[1];
+            const newName = "Theme 2.0";
+            const response = await request(app).put(`${themeApi}/${theme.id}`).send({ id: theme.id, name:  newName});
+            expect(response.status).toEqual(401);
+        });
+
+        it("should return 401 Unauthorized when passing an invalid token", async () => {
+            const allThemes = await getAllThemes();
+            const theme = allThemes[1];
+            const newName = "Theme 2.0";
+            const response = await request(app).put(`${themeApi}/${theme.id}`).set("Cookie", ["token=aabbccddeeff00112233445566"]).send({ id: theme.id, name:  newName});
+            expect(response.status).toEqual(401);
+        });
     });
 
     describe("update theme by id", () => {
@@ -252,10 +284,11 @@ describe("PUT /api/theme", () => {
         });
 
         it("should update name for theme in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const allThemes = await getAllThemes();
             const theme = allThemes[1];
             const newName = "Theme 2.0";
-            const response = await request(app).put(`${themeApi}/${theme.id}`).send({ id: theme.id, name:  newName});
+            const response = await request(app).put(`${themeApi}/${theme.id}`).set("Cookie", cookieHeader).send({ id: theme.id, name:  newName});
             expect(response.status).toEqual(200);
             const receivedTheme: Theme = response.body;
             expect(receivedTheme.id).toEqual(theme.id);
@@ -271,8 +304,9 @@ describe("DELETE /api/theme", () => {
         });
 
         it("should return 404 Not Found when updating a theme not in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const id = await getNonExistingThemeId();
-            const response = await request(app).delete(`${themeApi}/${id}`);
+            const response = await request(app).delete(`${themeApi}/${id}`).set("Cookie", cookieHeader);
             expect(response.status).toEqual(404);
         });
 
@@ -286,10 +320,18 @@ describe("DELETE /api/theme", () => {
             expect(response.status).toEqual(400);
         });
 
-        it("should return 204 No Content on successful delete", async () => {
+        it("should return 401 Unauthorized when not passing a token", async () => {
             const allThemes = await getAllThemes();
             const id = allThemes[2].id;
             const response = await request(app).delete(`${themeApi}/${id}`);
+            expect(response.status).toEqual(401);
+        });
+
+        it("should return 204 No Content on successful delete", async () => {
+            const cookieHeader = await getCookieHeader();
+            const allThemes = await getAllThemes();
+            const id = allThemes[2].id;
+            const response = await request(app).delete(`${themeApi}/${id}`).set("Cookie", cookieHeader);
             expect(response.status).toEqual(204);
         });
     });
@@ -300,19 +342,21 @@ describe("DELETE /api/theme", () => {
         });
 
         it("the number of themes should decrease by one on successful delete", async () => {
+            const cookieHeader = await getCookieHeader();
             const allThemes = await getAllThemes();
             const id = allThemes[2].id;
             const originalGetResponse = await request(app).get(themeApi);
-            const deleteResponse = await request(app).delete(`${themeApi}/${id}`);
+            const deleteResponse = await request(app).delete(`${themeApi}/${id}`).set("Cookie", cookieHeader);
             const newGetResponse = await request(app).get(themeApi);
             expect(deleteResponse.status).toEqual(204);
             expect(originalGetResponse.body.length - newGetResponse.body.length).toEqual(1);
         });
 
         it("deleted theme should not be found by id after successful delete", async () => {
+            const cookieHeader = await getCookieHeader();
             const allThemes = await getAllThemes();
             const id = allThemes[2].id;
-            const deleteResponse = await request(app).delete(`${themeApi}/${id}`);
+            const deleteResponse = await request(app).delete(`${themeApi}/${id}`).set("Cookie", cookieHeader);
             const getResponse = await request(app).get(`${themeApi}/${id}`);
             expect(deleteResponse.status).toEqual(204);
             expect(getResponse.status).toEqual(404);

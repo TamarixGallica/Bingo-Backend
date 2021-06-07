@@ -3,7 +3,7 @@ import app from "../src/app";
 import knex from "../src/config/database";
 import { Square, Theme } from "../src/models";
 import { squareEntries } from "../db/seeds/001_squares_and_themes";
-import { getAllThemes, getNonExistingThemeId, getTooLongText } from "./shared";
+import { getAllThemes, getCookieHeader, getNonExistingThemeId, getTooLongText } from "./shared";
 
 const squareApi = "/api/square";
 
@@ -195,19 +195,32 @@ describe("POST /api/square", () => {
         });
 
         it("should return 400 Bad Request when text and non-existing theme id are supplied", async () => {
+            const cookieHeader = await getCookieHeader();
             const themeId = await getNonExistingThemeId();
-            const response = await request(app).post(squareApi).send({ text: "foo", themeId: [themeId] });
+            const response = await request(app).post(squareApi).set("Cookie", cookieHeader).send({ text: "foo", themeId: [themeId] });
             expect(response.status).toEqual(400);
         });
 
+        it("should return 401 Unauthorized when not passing a token", async () => {
+            const response = await request(app).post(squareApi).send({ text: "authorization"});
+            expect(response.status).toEqual(401);
+        });
+
+        it("should return 401 Unauthorized when passing an invalid token", async () => {
+            const response = await request(app).post(squareApi).send({ text: "authorization"}).set("Cookie", ["token=aabbccddeeff00112233445566"]);
+            expect(response.status).toEqual(401);
+        });
+
         it("should return 200 when text is supplied", async () => {
-            const response = await request(app).post(squareApi).send({ text: "foo" });
+            const cookieHeader = await getCookieHeader();
+            const response = await request(app).post(squareApi).set("Cookie", cookieHeader).send({ text: "foo mama's pants" });
             expect(response.status).toEqual(200);
         });
 
         it("should return 200 when text and existing theme ids are supplied", async () => {
+            const cookieHeader = await getCookieHeader();
             const themeIds = await getExistingThemeIds();
-            const response = await request(app).post(squareApi).send({ text: "foo", themeId: themeIds });
+            const response = await request(app).post(squareApi).set("Cookie", cookieHeader).send({ text: "foo", themeId: themeIds });
             expect(response.status).toEqual(200);
         });
     });
@@ -218,8 +231,9 @@ describe("POST /api/square", () => {
         });
 
         it("should add a square without theme id array", async () => {
+            const cookieHeader = await getCookieHeader();
             const text = "foobar";
-            const response = await request(app).post(squareApi).send({ text });
+            const response = await request(app).post(squareApi).set("Cookie", cookieHeader).send({ text });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(Number.isInteger(receivedSquare.id)).toEqual(true);
@@ -228,8 +242,9 @@ describe("POST /api/square", () => {
         });
 
         it("should add a square with empty theme id array", async () => {
+            const cookieHeader = await getCookieHeader();
             const text = "tinstafl";
-            const response = await request(app).post(squareApi).send({ text, themeId: [] });
+            const response = await request(app).post(squareApi).set("Cookie", cookieHeader).send({ text, themeId: [] });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(Number.isInteger(receivedSquare.id)).toEqual(true);
@@ -238,10 +253,11 @@ describe("POST /api/square", () => {
         });
 
         it("should add a square with a single theme id", async () => {
+            const cookieHeader = await getCookieHeader();
             const text = "tinstafl";
             const themes = (await getAllThemes()).slice(-1, 1);
             const themeIds = themes.map(t => t.id);
-            const response = await request(app).post(squareApi).send({ text, themeId: themeIds });
+            const response = await request(app).post(squareApi).set("Cookie", cookieHeader).send({ text, themeId: themeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(Number.isInteger(receivedSquare.id)).toEqual(true);
@@ -250,11 +266,12 @@ describe("POST /api/square", () => {
         });
 
         it("should add a square with multiple theme ids", async () => {
+            const cookieHeader = await getCookieHeader();
             const text = "tinstafl";
             const allThemes = await getAllThemes();
             const allThemeIds = allThemes.map(t => t.id);
             const themeIds = allThemeIds.slice(0, 2);
-            const response = await request(app).post(squareApi).send({ text, themeId: themeIds });
+            const response = await request(app).post(squareApi).set("Cookie", cookieHeader).send({ text, themeId: themeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(Number.isInteger(receivedSquare.id)).toEqual(true);
@@ -271,8 +288,9 @@ describe("PUT /api/square", () => {
         });
 
         it("should return 404 Not Found when updating a square not in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const id = await getNonExistingSquareId();
-            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: "bar", themeId: [] });
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", cookieHeader).send({ id, text: "bar", themeId: [] });
             expect(response.status).toEqual(404);
         });
 
@@ -311,11 +329,28 @@ describe("PUT /api/square", () => {
         });
 
         it("should return 400 Bad Request when non-existing theme id is used", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const id = allSquares[0].id;
             const newThemeIds = [await getNonExistingThemeId()];
-            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", cookieHeader).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(400);
+        });
+
+        it("should return 401 Unauthorized when not passing a token", async () => {
+            const allSquares = await getAllSquares();
+            const id = allSquares[2].id;
+            const newText = "lorem ipsum dolor sit amet";
+            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: newText});
+            expect(response.status).toEqual(401);
+        });
+
+        it("should return 401 Unauthorized when passing an invalid token", async () => {
+            const allSquares = await getAllSquares();
+            const id = allSquares[2].id;
+            const newText = "lorem ipsum dolor sit amet";
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", ["token=aabbccddeeff00112233445566"]).send({ id, text: newText});
+            expect(response.status).toEqual(401);
         });
     });
 
@@ -325,10 +360,11 @@ describe("PUT /api/square", () => {
         });
 
         it("should update text for square in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const id = allSquares[2].id;
             const newText = "lorem ipsum dolor sit amet";
-            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: newText});
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", cookieHeader).send({ id, text: newText});
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(id);
@@ -336,10 +372,11 @@ describe("PUT /api/square", () => {
         });
 
         it("should add themes for square in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const id = allSquares[0].id;
             const newThemeIds = (await getExistingThemeIds()).filter(x => x % 2 == 0);
-            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", cookieHeader).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(id);
@@ -347,10 +384,11 @@ describe("PUT /api/square", () => {
         });
 
         it("should remove themes for square in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const id = allSquares[0].id;
-            const newThemeIds = [];
-            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
+            const newThemeIds: Array<number> = [];
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", cookieHeader).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(id);
@@ -358,11 +396,12 @@ describe("PUT /api/square", () => {
         });
 
         it("should replace themes for square in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const square = allSquares[0];
             const id = square.id;
             const newThemeIds = (await getExistingThemeIds()).filter(x => !square.themes.map(t => t.id).includes(x));
-            const response = await request(app).put(`${squareApi}/${id}`).send({ id, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", cookieHeader).send({ id, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(id);
@@ -370,12 +409,13 @@ describe("PUT /api/square", () => {
         });
 
         it("should update text and themes for square in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const square = allSquares[0];
             const id = square.id;
             const newThemeIds = [square.themes[0].id];
             const newText = "the new text";
-            const response = await request(app).put(`${squareApi}/${id}`).send({ id, text: newText, themeId: newThemeIds });
+            const response = await request(app).put(`${squareApi}/${id}`).set("Cookie", cookieHeader).send({ id, text: newText, themeId: newThemeIds });
             expect(response.status).toEqual(200);
             const receivedSquare: Square = response.body;
             expect(receivedSquare.id).toEqual(id);
@@ -392,8 +432,9 @@ describe("DELETE /api/square", () => {
         });
 
         it("should return 404 Not Found when updating a square not in database", async () => {
+            const cookieHeader = await getCookieHeader();
             const id = await getNonExistingSquareId();
-            const response = await request(app).delete(`${squareApi}/${id}`);
+            const response = await request(app).delete(`${squareApi}/${id}`).set("Cookie", cookieHeader);
             expect(response.status).toEqual(404);
         });
 
@@ -407,10 +448,25 @@ describe("DELETE /api/square", () => {
             expect(response.status).toEqual(400);
         });
 
+        it("should return 401 Unauthorized when not passing a token", async () => {
+            const allSquares = await getAllSquares();
+            const id = allSquares[2].id;
+            const response = await request(app).delete(`${squareApi}/${id}`);
+            expect(response.status).toEqual(401);
+        });
+
+        it("should return 401 Unauthorized when passing an invalid token", async () => {
+            const allSquares = await getAllSquares();
+            const id = allSquares[3].id;
+            const response = await request(app).delete(`${squareApi}/${id}`).set("Cookie", ["token=aabbccddeeff00112233445566"]);
+            expect(response.status).toEqual(401);
+        });
+
         it("should return 204 No Content on successful delete", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const id = allSquares[0].id;
-            const response = await request(app).delete(`${squareApi}/${id}`);
+            const response = await request(app).delete(`${squareApi}/${id}`).set("Cookie", cookieHeader);
             expect(response.status).toEqual(204);
         });
     });
@@ -421,19 +477,21 @@ describe("DELETE /api/square", () => {
         });
 
         it("the number of squares should decrease by one on successful delete", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const id = allSquares[1].id;
             const originalGetResponse = await request(app).get(squareApi);
-            const deleteResponse = await request(app).delete(`${squareApi}/${id}`);
+            const deleteResponse = await request(app).delete(`${squareApi}/${id}`).set("Cookie", cookieHeader);
             const newGetResponse = await request(app).get(squareApi);
             expect(deleteResponse.status).toEqual(204);
             expect(originalGetResponse.body.length - newGetResponse.body.length).toEqual(1);
         });
 
         it("deleted square should not be found by id after successful delete", async () => {
+            const cookieHeader = await getCookieHeader();
             const allSquares = await getAllSquares();
             const id = allSquares[2].id;
-            const deleteResponse = await request(app).delete(`${squareApi}/${id}`);
+            const deleteResponse = await request(app).delete(`${squareApi}/${id}`).set("Cookie", cookieHeader);
             const getResponse = await request(app).get(`${squareApi}/${id}`);
             expect(deleteResponse.status).toEqual(204);
             expect(getResponse.status).toEqual(404);
