@@ -33,6 +33,14 @@ This is a soon to be (mostly) RESTful API for a game of Bingo. This project has 
   - [X] Add a theme
   - [X] Remove a theme
 
+## Improvement ideas
+
+- [ ] Apply separation of concern.
+  - Currently for example services handle the business logic and manage data in database. They should take care of a single concern.
+- [ ] Improve error reporting by the API.
+  - Users get inconsistent error messages (if any). Informative error messages provided in addition to status codes would allow users to get a better idea of what happened.
+- [ ] Add API documentation.
+
 ## Requirements
 
 - Assigning multiple themes to a Bingo square should be possible
