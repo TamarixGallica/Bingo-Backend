@@ -11,8 +11,6 @@ export interface UserBase {
 
 export type LoginUser = Omit<UserBase, "name"> & Password;
 
-export type RegisterUser = UserBase & Password;
-
 export interface User extends UserBase {
     id: number;
     hash: string;

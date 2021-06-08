@@ -2,9 +2,9 @@
 
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { LoginUser, RegisterUser, User } from "../models";
-import knex from "../config/database";
+import { LoginUser, User } from "../models";
 import sessionService from "./sessionService";
+import userRepo, { AddUser } from "../repositories/userRepo";
 
 export enum UserResponseStatus {
     Success_OK,
@@ -23,8 +23,9 @@ export interface LoginUserResponse {
     token?: string;
 }
 
-const userTableName = "users";
-const returnedProps = ["id", "username", "name", "hash"];
+export type RegisterUser = Pick<User, "username"|"name"> & {
+    password: string;
+};
 
 const hashPassword = async (password: string): Promise<string> => {
     const hash = await bcrypt.hash(password, 12);
@@ -42,18 +43,8 @@ const generateToken = async (): Promise<string> => {
     return token;
 };
 
-export const getUserByUsername = async (username: string): Promise<User | undefined> => 
-{
-    const query = knex.first(returnedProps)
-        .from<User>(userTableName)
-        .where("username", username);
-
-    const user = await query;
-    return user;
-};
-
-export const addUser = async (user: RegisterUser): Promise<AddUserResponse> => {
-    const usernameTaken = await getUserByUsername(user.username);
+export const registerUser = async (user: RegisterUser): Promise<AddUserResponse> => {
+    const usernameTaken = await userRepo.getUserByUsername(user.username);
     if (usernameTaken)
     {
         return {
@@ -63,22 +54,22 @@ export const addUser = async (user: RegisterUser): Promise<AddUserResponse> => {
 
     const hash = await hashPassword(user.password);
 
-    const userToAdd = {
+    const userToAdd: AddUser = {
         username: user.username,
         name: user.name,
         hash,
     };
 
-    const addedUsers = await knex<User>(userTableName).insert(userToAdd).returning(returnedProps);
+    const addedUser = await userRepo.addUser(userToAdd);
 
     return {
         status: UserResponseStatus.Success_OK,
-        user: addedUsers[0]
+        user: addedUser
     };
 };
 
 export const loginUser = async (user: LoginUser): Promise<LoginUserResponse> => {
-    const userInDb = await getUserByUsername(user.username);
+    const userInDb = await userRepo.getUserByUsername(user.username);
 
     if (!userInDb)
     {
@@ -106,4 +97,4 @@ export const loginUser = async (user: LoginUser): Promise<LoginUserResponse> => 
     };
 };
 
-export default { getUserByUsername, addUser, loginUser };
+export default { registerUser, loginUser };

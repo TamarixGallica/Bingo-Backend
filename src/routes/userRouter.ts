@@ -1,8 +1,8 @@
 "use strict";
 
 import { Request, Response } from "express";
-import { LoginUser, RegisterUser, UserBase } from "../models";
-import userService, { UserResponseStatus } from "../services/userService";
+import { LoginUser, UserBase } from "../models";
+import userService, { RegisterUser, UserResponseStatus } from "../services/userService";
 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
     const loginUserRequest: LoginUser = {
@@ -27,7 +27,8 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         name: req.body.name,
         password: req.body.password,
     };
-    const registerResponse = await userService.addUser(addUserRequest);
+
+    const registerResponse = await userService.registerUser(addUserRequest);
 
     if (registerResponse.status === UserResponseStatus.Error_UsernameAlreadyTaken)
     {
